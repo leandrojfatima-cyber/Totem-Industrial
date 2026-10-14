@@ -1397,6 +1397,25 @@ export const INITIAL_ACUMULOS: AcumuloLinhaRecord[] = [
 ];
 
 // ============================================================================
+// POSICIONAMENTO OFICIAL DO BIG SWIVEL
+// Três colunas verticais conforme o desenho de referência.
+// ============================================================================
+export const BIG_SWIVEL_POSITIONS: Record<number, { x: number; y: number }> = {
+  1: { x: 459.5, y: 375 },
+  2: { x: 443, y: 375 },
+  3: { x: 426.5, y: 375 },
+  4: { x: 443, y: 391.5 },
+  5: { x: 459.5, y: 391.5 },
+  6: { x: 476, y: 391.5 },
+  7: { x: 476, y: 408 },
+  8: { x: 459.5, y: 408 },
+  9: { x: 443, y: 408 },
+  10: { x: 426.5, y: 408 },
+  11: { x: 410, y: 408 },
+  12: { x: 393.5, y: 408 }
+};
+
+// ============================================================================
 // GERADOR COMPLETO DOS PDTs
 // Com Plância (25 PDTs) e Doors (22 PDTs) no início + 150 PDTs Sequência L3 + 108 L1
 // ============================================================================
@@ -1550,19 +1569,9 @@ export function generateInitialPdts(): MapaPdtRecord[] {
       area = 'Big Swivel (1–12)';
       totemId = num <= 6 ? 'TOTEM-L3-BSW-01' : 'TOTEM-L3-BSW-06';
 
-      if (num <= 3) {
-        // Linha 1 (topo): 1, 2, 3
-        x = 420 + (num - 1) * 16;
-        y = 396;
-      } else if (num <= 7) {
-        // Linha 2 (meio): 4, 5, 6, 7
-        x = 452 - (num - 4) * 16;
-        y = 412;
-      } else {
-        // Linha 3 (base): 8, 9, 10, 11, 12
-        x = 404 + (num - 8) * 16;
-        y = 428;
-      }
+      const posicao = BIG_SWIVEL_POSITIONS[num];
+      x = posicao.x;
+      y = posicao.y;
     } else if (num <= 26) {
       // 2. Swivel (13–26): Laranja em pista horizontal dupla (ida e volta)
       trechoId = 'TRECHO-L3-SWIVEL';

@@ -18,6 +18,7 @@ import {
   INITIAL_TOTENS, 
   INITIAL_ACUMULOS, 
   INITIAL_COLABORADORES,
+  BIG_SWIVEL_POSITIONS,
   createDefaultTotemData 
 } from '../data/mapaInitialData';
 
@@ -61,7 +62,7 @@ export function MapaLinhaSvgView({
   globalSearchQuery = ''
 }: MapaLinhaSvgViewProps) {
   // Versão do schema de dados para garantir o alinhamento com a imagem de Betim
-  const STORAGE_VERSION = 'v_betim_oficial_2026_1';
+  const STORAGE_VERSION = 'v_betim_oficial_2026_2';
 
   const [pdts, setPdts] = useState<MapaPdtRecord[]>(() => {
     try {
@@ -1118,25 +1119,21 @@ export function MapaLinhaSvgView({
             {renderTotemMarker('TOTEM-L3-BDOR-18', 474, 183, 'Totem Big Doors (PDT 18)')}
 
             {/* ============================================================== */}
-            {/* 4. BIG SWIVEL (1 AO 12) — VERDE CLARO, SNAKE / LOOP EM S      */}
+            {/* 4. BIG SWIVEL (1 AO 12) — VERDE CLARO, TRÊS COLUNAS */}
             {/* ============================================================== */}
-            {/* Linha superior: 3, 2, 1 */}
-            {renderPdtSquare('SEQ-3', 3, 418, 385, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-2', 2, 434.5, 385, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-1', 1, 451, 385, '#22c55e', '#ffffff', '#16a34a')}
-
-            {/* Linha do meio: 4, 5, 6, 7 */}
-            {renderPdtSquare('SEQ-4', 4, 418, 401.5, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-5', 5, 434.5, 401.5, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-6', 6, 451, 401.5, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-7', 7, 467.5, 401.5, '#22c55e', '#ffffff', '#16a34a')}
-
-            {/* Linha inferior: 12, 11, 10, 9, 8 */}
-            {renderPdtSquare('SEQ-12', 12, 401.5, 418, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-11', 11, 418, 418, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-10', 10, 434.5, 418, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-9', 9, 451, 418, '#22c55e', '#ffffff', '#16a34a')}
-            {renderPdtSquare('SEQ-8', 8, 467.5, 418, '#22c55e', '#ffffff', '#16a34a')}
+            {Array.from({ length: 12 }, (_, i) => {
+              const numero = i + 1;
+              const posicao = BIG_SWIVEL_POSITIONS[numero];
+              return renderPdtSquare(
+                `SEQ-${numero}`,
+                numero,
+                posicao.x,
+                posicao.y,
+                '#22c55e',
+                '#ffffff',
+                '#16a34a'
+              );
+            })}
 
             {/* Totens Big Swivel (PDT 1 e PDT 6) */}
             {renderTotemMarker('TOTEM-L3-BSW-01', 473, 385, 'Totem Big Swivel 01 (PDT 1)')}
