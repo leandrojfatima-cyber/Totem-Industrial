@@ -144,6 +144,7 @@ export function MapaLinhaSvgView({
   const [buscaTerm, setBuscaTerm] = useState(globalSearchQuery);
   const [modoEdicao, setModoEdicao] = useState(initialModoEdicao);
   const [mostrarTotens, setMostrarTotens] = useState(true);
+  const [trechosVisiveis, setTrechosVisiveis] = useState<string[]>(() => TRECHOS_OFICIAIS.map(trecho => trecho.id));
 
   // Orientação da Visualização (Anti-horário ativado por padrão para layout paisagem)
   const [isRotatedAntiHorario, setIsRotatedAntiHorario] = useState(true);
@@ -460,6 +461,40 @@ export function MapaLinhaSvgView({
     return map;
   }, [pdts]);
 
+  const isTrechoVisivel = (trechoId?: string) => {
+    if (selectedLinha !== 'L3' || !trechoId) return true;
+    return trechosVisiveis.includes(trechoId);
+  };
+
+  const getTrechoIdFromTotem = (totemId: string) => {
+    if (totemId.includes('PLAN')) return 'TRECHO-L3-PLANCIA';
+    if (totemId.includes('BDOR')) return 'TRECHO-L3-BIG-DOORS';
+    if (totemId.includes('DOR')) return 'TRECHO-L3-DOORS';
+    if (totemId.includes('BSW')) return 'TRECHO-L3-BIG-SWIVEL';
+    if (totemId.includes('SWV')) return 'TRECHO-L3-SWIVEL';
+    if (totemId.includes('TRM')) return 'TRECHO-L3-TRIM';
+    if (totemId.includes('CHS')) return 'TRECHO-L3-CHASSI';
+    if (totemId.includes('BCH')) return 'TRECHO-L3-BIG-CHASSI';
+    if (totemId.includes('FIN')) return 'TRECHO-L3-FINAL';
+    return undefined;
+  };
+
+  const toggleTrechoVisibilidade = (trechoId: string) => {
+    setTrechosVisiveis(prev => prev.includes(trechoId)
+      ? prev.filter(id => id !== trechoId)
+      : [...prev, trechoId]);
+  };
+
+  const handleMapClick = (e: MouseEvent<SVGSVGElement>) => {
+    if (!modoEdicao || draggingPdtId || draggingTotemId) return;
+    const { x, y } = getSvgCoordinates(e.clientX, e.clientY);
+    const rawPosition = isRotatedAntiHorario
+      ? { x: Math.max(0, Math.round(545 - y - 15.5)), y: Math.max(0, Math.round(x + 35)) }
+      : { x: Math.max(0, Math.round(x - 7.75)), y: Math.max(0, Math.round(y - 7.75)) };
+    setFormNovoPdt(prev => ({ ...prev, x: rawPosition.x, y: rawPosition.y }));
+    setModalNovoPdtOpen(true);
+  };
+
   // Salvar Edição do PDT (Atende à regra: 1 Totem por Domínio, Domínio gere Colaboradores)
   const handleSavePdtEdit = (updatedPdt: MapaPdtRecord) => {
     const dom = dominios.find(d => d.id === updatedPdt.dominioId);
@@ -601,6 +636,13 @@ export function MapaLinhaSvgView({
     setEditingTotem(null);
   };
 
+  const handleDeleteTotem = (totemId: string) => {
+    if (window.confirm('Confirma a remoção deste totem do mapa?')) {
+      setTotens(prev => prev.filter(t => t.id !== totemId));
+      setEditingTotem(null);
+    }
+  };
+
   // Salvar Edição de Trecho
   const handleSaveTrechoEdit = (updatedTrecho: TrechoRecord) => {
     setTrechos(prev => prev.map(t => t.id === updatedTrecho.id ? updatedTrecho : t));
@@ -673,6 +715,7 @@ export function MapaLinhaSvgView({
     borderColor?: string
   ) => {
     const record = pdtMap.get(key);
+    if (record && !isTrechoVisivel(record.trechoId)) return null;
     const rawX = record && record.x !== undefined ? record.x : defaultX;
     const rawY = record && record.y !== undefined ? record.y : defaultY;
 
@@ -693,7 +736,8 @@ export function MapaLinhaSvgView({
         className={`interactive-cell transition-all duration-150 ${
           modoEdicao ? 'cursor-move hover:opacity-90' : 'cursor-pointer hover:opacity-90'
         }`}
-        onClick={() => {
+        onClick={e => {
+          e.stopPropagation();
           if (!record) return;
           if (modoEdicao) {
             setEditingPdt(record);
@@ -745,6 +789,7 @@ export function MapaLinhaSvgView({
   const renderTotemMarker = (totemId: string, defaultX: number, defaultY: number, label: string) => {
     if (!mostrarTotens) return null;
     const t = totens.find(item => item.id === totemId);
+    if (!isTrechoVisivel(getTrechoIdFromTotem(totemId))) return null;
     const rawX = t?.x ?? defaultX;
     const rawY = t?.y ?? defaultY;
     const coords = getTransformedTotemCoords(rawX, rawY);
@@ -756,7 +801,8 @@ export function MapaLinhaSvgView({
       <g 
         key={`totem-${totemId}`}
         className={`interactive-cell group ${modoEdicao ? 'cursor-move' : 'cursor-pointer'}`}
-        onClick={() => {
+        onClick={e => {
+          e.stopPropagation();
           if (!t) return;
           if (modoEdicao) {
             setEditingTotem(t);
@@ -908,7 +954,7 @@ export function MapaLinhaSvgView({
         <div className="bg-amber-950/80 border-b border-amber-500/40 text-amber-200 px-4 py-2 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shrink-0 animate-in fade-in duration-150">
           <div className="flex items-center gap-2 text-amber-300">
             <i className="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
-            <span><strong>Modo Edição Ativo:</strong> Arraste qualquer PDT ou Totem no mapa, ou clique neles para editar dados e alocar colaboradores.</span>
+            <span><strong>Modo Edição Ativo:</strong> Arraste PDTs e Totens, clique para editar ou clique em uma área vazia para acrescentar um PDT.</span>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -1007,6 +1053,7 @@ export function MapaLinhaSvgView({
               viewBox={isRotatedAntiHorario ? "0 0 780 300" : "0 0 680 820"}
               className="w-full h-full max-h-[calc(100vh-210px)] object-contain select-none"
               preserveAspectRatio="xMidYMid meet"
+              onClick={handleMapClick}
             >
               {/* Grade Técnica Industrial de Fundo (Checkered Black Pattern) */}
               <defs>
@@ -1189,33 +1236,35 @@ export function MapaLinhaSvgView({
           <div className="flex items-center justify-between pt-2 mt-1 border-t border-slate-800/80 px-2 shrink-0 text-[10px] font-mono text-slate-400 overflow-x-auto gap-2">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="font-bold text-slate-300">TRECHOS:</span>
-              <span className="flex items-center gap-1 bg-yellow-950/40 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700/50">
-                <span className="w-2 h-2 rounded-xs bg-yellow-400"></span> Plância (1-25)
-              </span>
-              <span className="flex items-center gap-1 bg-emerald-950/40 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700/50">
-                <span className="w-2 h-2 rounded-xs bg-emerald-500"></span> Doors (1-17)
-              </span>
-              <span className="flex items-center gap-1 bg-sky-950/40 text-sky-300 px-2 py-0.5 rounded border border-sky-700/50">
-                <span className="w-2 h-2 rounded-xs bg-sky-400"></span> Big Doors (18-22)
-              </span>
-              <span className="flex items-center gap-1 bg-green-950/40 text-green-300 px-2 py-0.5 rounded border border-green-700/50">
-                <span className="w-2 h-2 rounded-xs bg-green-500"></span> Big Swivel (1-12)
-              </span>
-              <span className="flex items-center gap-1 bg-orange-950/40 text-orange-300 px-2 py-0.5 rounded border border-orange-700/50">
-                <span className="w-2 h-2 rounded-xs bg-orange-500"></span> Swivel (13-26)
-              </span>
-              <span className="flex items-center gap-1 bg-blue-950/40 text-blue-300 px-2 py-0.5 rounded border border-blue-700/50">
-                <span className="w-2 h-2 rounded-xs bg-blue-600"></span> Trim (27-50)
-              </span>
-              <span className="flex items-center gap-1 bg-red-950/40 text-red-300 px-2 py-0.5 rounded border border-red-700/50">
-                <span className="w-2 h-2 rounded-xs bg-red-500"></span> Chassi (51-93)
-              </span>
-              <span className="flex items-center gap-1 bg-cyan-950/40 text-cyan-300 px-2 py-0.5 rounded border border-cyan-700/50">
-                <span className="w-2 h-2 rounded-xs bg-cyan-500"></span> Big Chassi (94-108)
-              </span>
-              <span className="flex items-center gap-1 bg-fuchsia-950/40 text-fuchsia-300 px-2 py-0.5 rounded border border-fuchsia-700/50">
-                <span className="w-2 h-2 rounded-xs bg-fuchsia-500"></span> Final (109-150)
-              </span>
+              {TRECHOS_OFICIAIS.map(trecho => {
+                const ativo = trechosVisiveis.includes(trecho.id);
+                return (
+                  <button
+                    key={trecho.id}
+                    type="button"
+                    onClick={() => toggleTrechoVisibilidade(trecho.id)}
+                    className={`flex items-center gap-1 px-2 py-0.5 rounded border transition cursor-pointer ${
+                      ativo ? 'opacity-100 ring-1 ring-white/20' : 'opacity-35 line-through'
+                    }`}
+                    style={{
+                      color: trecho.corHex,
+                      backgroundColor: `${trecho.corHex}18`,
+                      borderColor: `${trecho.corHex}80`
+                    }}
+                    title={ativo ? `Ocultar ${trecho.nome}` : `Exibir ${trecho.nome}`}
+                  >
+                    <span className="w-2 h-2 rounded-xs" style={{ backgroundColor: trecho.corHex }} />
+                    {trecho.nome} ({trecho.pdtFaixa.replace(' AO ', '-')})
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setTrechosVisiveis(TRECHOS_OFICIAIS.map(trecho => trecho.id))}
+                className="px-2 py-0.5 rounded border border-sky-600/70 bg-sky-950/60 text-sky-300 hover:bg-sky-900/70 transition cursor-pointer font-bold"
+              >
+                Exibir todos
+              </button>
             </div>
 
             <button
@@ -2554,9 +2603,17 @@ export function MapaLinhaSvgView({
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
-              <button onClick={() => setEditingTotem(null)} className="px-3 py-1.5 bg-slate-800 rounded text-xs">Cancelar</button>
-              <button onClick={() => handleSaveTotemEdit(editingTotem)} className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold">Salvar Totem</button>
+            <div className="flex justify-between gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={() => handleDeleteTotem(editingTotem.id)}
+                className="px-3 py-1.5 bg-red-950/80 hover:bg-red-900 text-red-300 rounded text-xs font-bold border border-red-800"
+              >
+                Excluir Totem
+              </button>
+              <div className="flex gap-2">
+                <button onClick={() => setEditingTotem(null)} className="px-3 py-1.5 bg-slate-800 rounded text-xs">Cancelar</button>
+                <button onClick={() => handleSaveTotemEdit(editingTotem)} className="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-bold">Salvar Totem</button>
+              </div>
             </div>
           </div>
         </div>
