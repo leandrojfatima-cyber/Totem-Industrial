@@ -144,7 +144,6 @@ export function MapaLinhaSvgView({
   const [buscaTerm, setBuscaTerm] = useState(globalSearchQuery);
   const [modoEdicao, setModoEdicao] = useState(initialModoEdicao);
   const [mostrarTotens, setMostrarTotens] = useState(true);
-  const [mostrarAcumulos, setMostrarAcumulos] = useState(true);
 
   // Orientação da Visualização (Anti-horário ativado por padrão para layout paisagem)
   const [isRotatedAntiHorario, setIsRotatedAntiHorario] = useState(true);
@@ -788,48 +787,6 @@ export function MapaLinhaSvgView({
     );
   };
 
-  // Renderizar áreas de acúmulo da linha (Espaços coloridos sem números e SEM informações conforme solicitação)
-  const renderAcumuloArea = (ac: AcumuloLinhaRecord) => {
-    if (!mostrarAcumulos) return null;
-    const isSelected = selectedAcumulo?.id === ac.id || editingAcumulo?.id === ac.id;
-    const isDraggingThis = draggingAcumuloId === ac.id;
-
-    const coords = getTransformedCoords(ac.x, ac.y, ac.w, ac.h);
-
-    return (
-      <g
-        key={ac.id}
-        className={`interactive-cell ${modoEdicao ? 'cursor-move' : 'cursor-pointer'}`}
-        onClick={() => {
-          if (modoEdicao) {
-            setEditingAcumulo(ac);
-          } else {
-            setSelectedAcumulo(ac);
-          }
-        }}
-        onMouseDown={e => {
-          if (modoEdicao) {
-            e.stopPropagation();
-            setDraggingAcumuloId(ac.id);
-          }
-        }}
-      >
-        <rect
-          x={coords.x}
-          y={coords.y}
-          width={coords.w}
-          height={coords.h}
-          fill={ac.cor}
-          rx={2}
-          stroke={isSelected ? '#ffffff' : isDraggingThis ? '#38bdf8' : modoEdicao ? '#fef08a' : ac.cor}
-          strokeWidth={isSelected || isDraggingThis ? 2 : modoEdicao ? 1.5 : 0.6}
-          strokeDasharray={modoEdicao ? '3 1.5' : undefined}
-          className="transition-all hover:filter hover:brightness-110"
-        />
-      </g>
-    );
-  };
-
   return (
     <div className="flex flex-col h-full bg-[#090d16] text-slate-100 font-sans select-none overflow-hidden print:bg-white print:text-black">
       {/* 1. Barra de Ferramentas Superior — Configurações e Ações */}
@@ -1220,11 +1177,6 @@ export function MapaLinhaSvgView({
             {renderTotemMarker('TOTEM-L3-FIN-120', 272, 552, 'Totem Final 02 (PDT 120)')}
             {renderTotemMarker('TOTEM-L3-FIN-130', 272, 387, 'Totem Final 03 (PDT 130)')}
             {renderTotemMarker('TOTEM-L3-FIN-140', 272, 222, 'Totem Final 04 (PDT 140)')}
-
-            {/* ============================================================== */}
-            {/* ÁREAS DE ACÚMULO DA LINHA (Espaços coloridos sem números)      */}
-            {/* ============================================================== */}
-            {acumulos.filter(a => a.linhaId === selectedLinha).map(ac => renderAcumuloArea(ac))}
 
             {/* PDTs adicionais criados pelo usuário que não estão na sequência padrão */}
             {pdts.filter(p => p.linha === selectedLinha && p.id.includes('NEW')).map(extraPdt => {
