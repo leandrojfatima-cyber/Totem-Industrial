@@ -1,0 +1,6 @@
+{
+  "name": "SIS Totem Team Leader System — Stellantis",
+  "description": "Sistema oficial Totem Team Leader System para Stellantis: Folha A1 Briefing, Gemba Walk, LAP, Matriz de Polivalência 331, Controle Amostral BP8, Medidas Conservatórias BP9, Red Rabbit, Kaizen e Relatórios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
