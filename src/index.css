@@ -543,6 +543,198 @@
 }
 
 /* ==========================================================================
+   CORREÇÃO FORÇADA: MAPA DA LINHA SVG (MapaLinhaSvgView) NO TEMA CLARO
+   Elimina TODOS os fundos escuros hardcoded (bg-[#090d16], bg-[#070b13],
+   bg-slate-900, bg-slate-800, bg-slate-950, bg-amber-950, bg-red-950, etc.)
+   ========================================================================== */
+
+/* 1. Container raiz do mapa — fundo escuro hardcoded → cinza claro */
+.theme-light .bg-\[\#090d16\] {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+.theme-light .bg-\[\#070b13\] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+}
+
+/* 2. Barra de ferramentas superior do mapa */
+.theme-light .bg-slate-900.border-b.border-slate-800.text-white {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.06) !important;
+}
+
+/* 3. BANNER "Modo Edição Ativo" — fundo âmbar escuro → âmbar claro pastel */
+.theme-light .bg-amber-950\/80 {
+  background-color: #FEF3C7 !important;
+  border-color: #FCD34D !important;
+  color: #78350F !important;
+}
+.theme-light .bg-amber-950\/80 .text-amber-200,
+.theme-light .bg-amber-950\/80 .text-amber-300,
+.theme-light .bg-amber-950\/80 .text-amber-400 {
+  color: #78350F !important;
+}
+.theme-light .bg-amber-950\/80 strong {
+  color: #78350F !important;
+}
+
+/* Badge "MODO EDIÇÃO" pulsante */
+.theme-light .bg-amber-950\/60 {
+  background-color: #FEF3C7 !important;
+  border-color: #FCD34D !important;
+  color: #78350F !important;
+}
+.theme-light .bg-amber-950\/60 .text-amber-400 {
+  color: #78350F !important;
+}
+
+/* 4. Botões secundários do mapa (bg-slate-800, bg-slate-900) → claro */
+.theme-light .bg-slate-800:not(.chart-tooltip):not(.group:hover .absolute) {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+.theme-light .bg-slate-800:hover:not(.chart-tooltip) {
+  background-color: #E2E8F0 !important;
+  color: #0F172A !important;
+}
+.theme-light .bg-slate-900 {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+.theme-light .bg-slate-900:hover {
+  background-color: #F8FAFC !important;
+}
+
+/* 5. Botões de trecho (pills) — forçar texto escuro de alto contraste */
+.theme-light button[type="button"] .text-slate-300,
+.theme-light button[type="button"] .text-slate-200 {
+  color: #1E293B !important;
+}
+
+/* 6. Botões vermelhos de "Restaurar Layout" e ações destrutivas */
+.theme-light .bg-red-950\/60, .theme-light .bg-red-950\/80 {
+  background-color: #FEE2E2 !important;
+  color: #991B1B !important;
+  border-color: #DC2626 !important;
+}
+.theme-light .bg-red-950\/60:hover, .theme-light .bg-red-950\/80:hover {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+.theme-light .bg-red-950\/60 .text-red-300,
+.theme-light .bg-red-950\/80 .text-red-300 {
+  color: #991B1B !important;
+}
+
+/* 7. Board interno do mapa (bg-[#070b13] com borda escura) */
+.theme-light .border-slate-800\/90,
+.theme-light .border-slate-800\/80 {
+  border-color: #CBD5E1 !important;
+}
+
+/* 8. Faixa inferior de trechos e legenda */
+.theme-light .border-slate-800\/80 .text-slate-400,
+.theme-light .border-slate-800\/80 .text-slate-300 {
+  color: #334155 !important;
+}
+
+/* 9. Select azul âmbar (Domínio) no modal de edição */
+.theme-light .bg-amber-950\/40 {
+  background-color: #FEF3C7 !important;
+  border-color: #D97706 !important;
+  color: #78350F !important;
+}
+
+/* 10. Selects dentro de modais do mapa */
+.theme-light .fixed.inset-0 select.bg-slate-900,
+.theme-light .fixed.inset-0 select[class*="bg-slate"] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #94A3B8 !important;
+}
+
+/* 11. Inputs dentro de modais do mapa */
+.theme-light .fixed.inset-0 input.bg-slate-950,
+.theme-light .fixed.inset-0 input[class*="bg-slate"] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #94A3B8 !important;
+}
+
+/* 12. Divisores e bordas internas dos modais do mapa */
+.theme-light .fixed.inset-0 .border-slate-800,
+.theme-light .fixed.inset-0 .border-slate-700,
+.theme-light .fixed.inset-0 .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #E2E8F0 !important;
+}
+
+/* 13. Textos dentro de modais do mapa */
+.theme-light .fixed.inset-0 .text-slate-400 { color: #334155 !important; }
+.theme-light .fixed.inset-0 .text-slate-300 { color: #1E293B !important; }
+.theme-light .fixed.inset-0 .text-slate-200 { color: #1E293B !important; }
+.theme-light .fixed.inset-0 .text-amber-300 { color: #78350F !important; font-weight: 700; }
+.theme-light .fixed.inset-0 .text-amber-400 { color: #78350F !important; }
+
+/* 14. Canvas SVG: forçar fundo claro no <rect> de fundo do SVG */
+.theme-light svg rect[fill="#070b13"] {
+  fill: #F8FAFC !important;
+}
+.theme-light svg rect[stroke="#1e293b"] {
+  stroke: #CBD5E1 !important;
+}
+
+/* 15. Padrões de grade do SVG no tema claro */
+.theme-light svg pattern path[stroke="#1e293b"] {
+  stroke: #E2E8F0 !important;
+  opacity: 0.6 !important;
+}
+.theme-light svg pattern path[stroke="#334155"] {
+  stroke: #CBD5E1 !important;
+  opacity: 0.5 !important;
+}
+
+/* ==========================================================================
+   CORREÇÃO: MAPA LINHA VIEW (Cards) NO TEMA CLARO
+   ========================================================================== */
+.theme-light .bg-slate-900\/90 { background-color: #FFFFFF !important; border-color: #CBD5E1 !important; }
+.theme-light .bg-slate-900\/80 { background-color: #F8FAFC !important; border-color: #E2E8F0 !important; }
+.theme-light .bg-slate-950\/60 { background-color: #F8FAFC !important; border-color: #E2E8F0 !important; }
+.theme-light .bg-slate-950\/90 { background-color: #F8FAFC !important; border-color: #CBD5E1 !important; }
+
+/* ==========================================================================
+   CORREÇÃO: PAINEL TOTEM PDT MODAL NO TEMA CLARO
+   ========================================================================== */
+.theme-light .bg-slate-950\/80 { background-color: rgba(15, 23, 42, 0.7) !important; }
+.theme-light .bg-slate-950\/90 { background-color: #F8FAFC !important; border-color: #CBD5E1 !important; color: #0F172A !important; }
+
+/* Selects e inputs dentro do Painel Totem */
+.theme-light .bg-slate-950 .bg-slate-900,
+.theme-light .bg-slate-900.border-slate-700 {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+/* ==========================================================================
+   CORREÇÃO: TAGS DE TRECHO (PILLS COLORIDAS) NO TEMA CLARO
+   Garantir que texto das pills de trecho tenha contraste máximo
+   ========================================================================== */
+.theme-light button[type="button"][style*="color:"] {
+  font-weight: 800 !important;
+}
+
+/* Pills de trecho com fundo translúcido — forçar texto escuro legível */
+.theme-light button[type="button"][style*="backgroundColor"] {
+  font-weight: 800 !important;
+  text-shadow: none !important;
+}
+
+/* ==========================================================================
    IMPRESSÃO
    ========================================================================== */
 @media print {
