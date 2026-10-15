@@ -77,6 +77,8 @@
 
 .theme-light {
   color-scheme: light;
+  --background: #FFFFFF;
+  --foreground: #0F172A;
   --sis-bg-app: #F1F5F9;
   --sis-bg-surface: #FFFFFF;
   --sis-bg-surface-elevated: #F8FAFC;
@@ -299,7 +301,11 @@
 
 .theme-light .bg-slate-900,
 .theme-light .bg-slate-900\/60, .theme-light .bg-slate-900\/70,
-.theme-light .bg-slate-900\/80, .theme-light .bg-slate-900\/90 {
+.theme-light .bg-slate-900\/80, .theme-light .bg-slate-900\/90,
+.theme-light .bg-slate-850,
+.theme-light .bg-slate-800,
+.theme-light .bg-slate-800\/60, .theme-light .bg-slate-800\/80,
+.theme-light .bg-slate-800\/90 {
   background-color: #FFFFFF !important;
   border-color: #CBD5E1 !important;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06) !important;
@@ -319,14 +325,71 @@
 .theme-light .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]),
 .theme-light .divide-slate-800\/80 > :not([hidden]) ~ :not([hidden]) { border-color: #E2E8F0 !important; }
 
-/* PROIBIDO texto claro sobre fundo claro */
-.theme-light .text-white:not(button.bg-sky-600 *):not(button.bg-emerald-600 *):not(button.bg-amber-600 *):not(button.bg-red-600 *):not(button.bg-sky-600):not(button.bg-emerald-600):not(button.bg-amber-600):not(button.bg-red-600):not(.bg-sky-600 *):not(.bg-emerald-600 *):not(.bg-red-600 *):not(.bg-red-500 *):not(.bg-orange-500 *):not(.bg-amber-600 *):not(.chart-tooltip *):not(.group-hover\:block *) {
+/* ==========================================================================
+   PROIBIÇÃO TOTAL DE TEXTO BRANCO/CLARO SOBRE FUNDO CLARO (TEMA CLARO)
+   Isolamento forçado: qualquer text-white que não esteja dentro de um
+   botão de ação colorido (fundo saturado) é forçado para texto escuro.
+   ========================================================================== */
+
+/* 1. Texto branco genérico → forçado para escuro (exceto dentro de botões/elementos de fundo saturado) */
+.theme-light .text-white {
   color: #0F172A !important;
 }
+
+/* 2. Exceções: botões de ação com fundo colorido mantêm texto branco */
+.theme-light button.bg-sky-600, .theme-light button.bg-sky-500,
+.theme-light button.bg-emerald-600, .theme-light button.bg-emerald-500,
+.theme-light button.bg-amber-600, .theme-light button.bg-amber-500,
+.theme-light button.bg-red-600, .theme-light button.bg-red-500,
+.theme-light button.bg-orange-500, .theme-light button.bg-orange-600,
+.theme-light .bg-sky-600, .theme-light .bg-sky-500,
+.theme-light .bg-emerald-600, .theme-light .bg-emerald-500,
+.theme-light .bg-amber-600, .theme-light .bg-amber-500,
+.theme-light .bg-red-600, .theme-light .bg-red-500,
+.theme-light .bg-orange-500, .theme-light .bg-orange-600,
+.theme-light .sis-btn-primary,
+.theme-light .bg-yellow-400, .theme-light .bg-yellow-400\/80 {
+  color: #FFFFFF !important;
+}
+
+/* 3. Texto dentro de botões/elementos de fundo saturado também é branco */
+.theme-light button.bg-sky-600 *, .theme-light button.bg-sky-500 *,
+.theme-light button.bg-emerald-600 *, .theme-light button.bg-emerald-500 *,
+.theme-light button.bg-amber-600 *, .theme-light button.bg-amber-500 *,
+.theme-light button.bg-red-600 *, .theme-light button.bg-red-500 *,
+.theme-light button.bg-orange-500 *, .theme-light button.bg-orange-600 *,
+.theme-light .bg-sky-600 *, .theme-light .bg-sky-500 *,
+.theme-light .bg-emerald-600 *, .theme-light .bg-emerald-500 *,
+.theme-light .bg-amber-600 *, .theme-light .bg-amber-500 *,
+.theme-light .bg-red-600 *, .theme-light .bg-red-500 *,
+.theme-light .bg-orange-500 *, .theme-light .bg-orange-600 *,
+.theme-light .sis-btn-primary *,
+.theme-light .bg-yellow-400 *, .theme-light .bg-yellow-400\/80 * {
+  color: #FFFFFF !important;
+}
+
+/* 4. Tooltips e chart-tooltip mantêm fundo escuro com texto branco */
+.theme-light .chart-tooltip, .theme-light .chart-tooltip *,
+.theme-light .group:hover .absolute.bg-slate-800,
+.theme-light .group:hover .absolute.bg-slate-800 * {
+  color: #FFFFFF !important;
+}
+
+/* 5. Badges de status com fundo pastel NUNCA usam texto branco */
+.theme-light .sis-badge-ok, .theme-light .sis-badge-warn,
+.theme-light .sis-badge-crit, .theme-light .sis-badge-info { color: var(--sis-status-ok-text, #166534) !important; }
+.theme-light .sis-badge-warn { color: #78350F !important; }
+.theme-light .sis-badge-crit { color: #991B1B !important; }
+.theme-light .sis-badge-info { color: #003B94 !important; }
+.theme-light .sis-badge-ok { color: #166534 !important; }
+
+/* 6. Classes de texto slate claras → forçadas para tons escuros legíveis */
 .theme-light .text-slate-100 { color: #0F172A !important; }
 .theme-light .text-slate-200, .theme-light .text-slate-300 { color: #1E293B !important; }
 .theme-light .text-slate-400 { color: #334155 !important; }
 .theme-light .text-slate-500 { color: #1E293B !important; }
+.theme-light .text-slate-600 { color: #334155 !important; }
+.theme-light .text-slate-700 { color: #1E293B !important; }
 
 .theme-light .text-sky-200, .theme-light .text-sky-300, .theme-light .text-sky-400 { color: #003B94 !important; font-weight: 700; }
 .theme-light .text-amber-200, .theme-light .text-amber-300, .theme-light .text-amber-400, .theme-light .text-yellow-400 { color: #78350F !important; font-weight: 700; }
@@ -358,8 +421,13 @@
 .theme-light .bg-sky-600 *, .theme-light .bg-emerald-600 *,
 .theme-light .bg-amber-600 *, .theme-light .bg-red-600 * { color: #FFFFFF !important; }
 
-.theme-light button.bg-slate-800 { background-color: #F1F5F9 !important; color: #0F172A !important; border-color: #94A3B8 !important; font-weight: 600; }
-.theme-light button.bg-slate-800:hover { background-color: #E2E8F0 !important; color: #0F172A !important; }
+.theme-light button.bg-slate-800,
+.theme-light button.bg-slate-700,
+.theme-light .bg-slate-800:not(.chart-tooltip):not(.group:hover .absolute) {
+  background-color: #F1F5F9 !important; color: #0F172A !important; border-color: #94A3B8 !important; font-weight: 600;
+}
+.theme-light button.bg-slate-800:hover,
+.theme-light button.bg-slate-700:hover { background-color: #E2E8F0 !important; color: #0F172A !important; }
 
 /* ==========================================================================
    BOTÕES DE AÇÃO DE TABELAS — CONTRASTE WCAG
@@ -412,11 +480,35 @@
 }
 .theme-light button.sis-btn-move:hover, .theme-light td button.bg-slate-800:hover { background-color: #CBD5E1 !important; color: #000000 !important; }
 
-/* Badges no tema claro */
-.theme-light .bg-emerald-500\/20, .theme-light .bg-emerald-500\/10 { background-color: #DCFCE7 !important; color: #14532D !important; border-color: #16A34A !important; font-weight: 700 !important; }
-.theme-light .bg-red-500\/20, .theme-light .bg-red-500\/10 { background-color: #FEE2E2 !important; color: #991B1B !important; border-color: #DC2626 !important; font-weight: 700 !important; }
-.theme-light .bg-amber-500\/20, .theme-light .bg-amber-500\/10 { background-color: #FEF3C7 !important; color: #78350F !important; border-color: #D97706 !important; font-weight: 700 !important; }
-.theme-light .bg-sky-500\/20, .theme-light .bg-sky-500\/10 { background-color: #E0F2FE !important; color: #003B94 !important; border-color: #0284C7 !important; font-weight: 700 !important; }
+/* Badges no tema claro — texto SEMPRE escuro, NUNCA branco */
+.theme-light .bg-emerald-500\/20, .theme-light .bg-emerald-500\/10, .theme-light .bg-emerald-500\/30 { background-color: #DCFCE7 !important; color: #14532D !important; border-color: #16A34A !important; font-weight: 700 !important; }
+.theme-light .bg-red-500\/20, .theme-light .bg-red-500\/10, .theme-light .bg-red-500\/30 { background-color: #FEE2E2 !important; color: #991B1B !important; border-color: #DC2626 !important; font-weight: 700 !important; }
+.theme-light .bg-amber-500\/20, .theme-light .bg-amber-500\/10, .theme-light .bg-amber-500\/30 { background-color: #FEF3C7 !important; color: #78350F !important; border-color: #D97706 !important; font-weight: 700 !important; }
+.theme-light .bg-sky-500\/20, .theme-light .bg-sky-500\/10, .theme-light .bg-sky-500\/30 { background-color: #E0F2FE !important; color: #003B94 !important; border-color: #0284C7 !important; font-weight: 700 !important; }
+
+/* Celulas de status com texto branco forçado para escuro no tema claro */
+.theme-light td.text-white, .theme-light td .text-white,
+.theme-light span.text-white.bg-emerald-500\/20,
+.theme-light span.text-white.bg-red-500\/20,
+.theme-light span.text-white.bg-amber-500\/20,
+.theme-light span.text-white.bg-sky-500\/20,
+.theme-light span.text-white.bg-green-500\/20,
+.theme-light span.text-white.bg-orange-500\/20,
+.theme-light div.text-white.bg-emerald-500\/20,
+.theme-light div.text-white.bg-red-500\/20,
+.theme-light div.text-white.bg-amber-500\/20,
+.theme-light div.text-white.bg-sky-500\/20 {
+  color: #0F172A !important;
+}
+
+/* Forçar texto escuro em qualquer elemento com fundo pastel de status */
+.theme-light .bg-green-100, .theme-light .bg-green-50 { color: #166534 !important; }
+.theme-light .bg-red-100, .theme-light .bg-red-50 { color: #991B1B !important; }
+.theme-light .bg-amber-100, .theme-light .bg-amber-50 { color: #78350F !important; }
+.theme-light .bg-sky-100, .theme-light .bg-sky-50 { color: #003B94 !important; }
+.theme-light .bg-yellow-100, .theme-light .bg-yellow-50 { color: #78350F !important; }
+.theme-light .bg-orange-100, .theme-light .bg-orange-50 { color: #78350F !important; }
+.theme-light .bg-emerald-100, .theme-light .bg-emerald-50 { color: #166534 !important; }
 
 /* Caixas de acento suaves no tema claro */
 .theme-light .bg-sky-950\/40, .theme-light .bg-sky-950\/60, .theme-light .bg-sky-950 { background-color: #F0F9FF !important; border-color: #BAE6FD !important; color: #003B94 !important; }
