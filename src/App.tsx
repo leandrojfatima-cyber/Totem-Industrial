@@ -1218,8 +1218,8 @@ export default function App() {
   ];
 
   return (
-    <div className={`flex h-screen overflow-hidden font-sans antialiased transition-colors ${
-      theme === 'light' ? 'bg-slate-50 text-slate-900 theme-light' : 'bg-slate-950 text-slate-100 theme-dark'
+    <div className={`flex h-screen overflow-hidden font-sans antialiased transition-colors sis-bg-app ${
+      theme === 'light' ? 'theme-light' : 'theme-dark'
     }`}>
       {/* Sidebar Retrátil com os 6 Agrupamentos Lógicos da Fase 2 */}
       <SidebarNavigation
@@ -1234,82 +1234,66 @@ export default function App() {
       />
 
       {/* Área Principal de Conteúdo */}
-      <main className={`flex-1 flex flex-col h-screen overflow-hidden ${
-        theme === 'light' ? 'bg-slate-50' : 'bg-slate-950'
-      }`}>
-        <header className={`border-b px-4 py-2.5 flex flex-wrap justify-between items-center no-print shrink-0 gap-2 ${
-          theme === 'light' ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-900 border-slate-800'
-        }`}>
+      <main className="flex-1 flex flex-col h-screen overflow-hidden sis-bg-app">
+        <header
+          className="border-b px-4 py-2.5 flex flex-wrap justify-between items-center no-print shrink-0 gap-2 sis-bg-surface sis-shadow-sm"
+          style={{ borderColor: 'var(--sis-border-main)' }}
+        >
           <div className="flex items-center space-x-3">
-            <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded border ${
-              theme === 'light' ? 'bg-amber-50 text-amber-800 border-amber-300' : 'bg-slate-800 text-amber-300 border-slate-700'
-            }`}>
+            <span
+              className="text-xs font-mono font-bold px-2.5 py-1 rounded border"
+              style={{ backgroundColor: 'var(--sis-status-warn-bg)', color: 'var(--sis-status-warn-text)', borderColor: 'var(--sis-status-warn-border)' }}
+            >
               {data.header.plant}
             </span>
-            <span className={`text-xs font-mono hidden md:inline ${theme === 'light' ? 'text-slate-600 font-semibold' : 'text-slate-300'}`}>
+            <span className="text-xs font-mono hidden md:inline font-semibold sis-text-secondary">
               {data.header.line} • {data.header.area}
             </span>
 
-            {/* Filtro de Busca Global (PDT, Linha ou T-Leader) */}
+            {/* Busca Global */}
             <form onSubmit={handleHeaderSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
                 placeholder="Busca global (PDT, Linha, Líder)..."
                 value={headerGlobalSearch}
                 onChange={e => setHeaderGlobalSearch(e.target.value)}
-                className={`text-xs font-mono pl-7 pr-3 py-1 rounded-lg border w-44 sm:w-56 focus:outline-none focus:border-sky-500 transition ${
-                  theme === 'light' ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-slate-950 border-slate-700 text-white'
-                }`}
+                className="text-xs font-mono pl-7 pr-3 py-1 rounded-lg border w-44 sm:w-56 focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
+                style={{ outlineColor: 'var(--sis-focus-ring)' }}
               />
-              <i className="fa-solid fa-magnifying-glass text-slate-400 text-[11px] absolute left-2.5 pointer-events-none"></i>
+              <i className="fa-solid fa-magnifying-glass text-[11px] absolute left-2.5 pointer-events-none" style={{ color: 'var(--sis-text-muted)' }}></i>
             </form>
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Seletor Rápido de Perfil de Usuário */}
+            {/* Perfil */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono text-slate-400 hidden lg:inline font-bold">Perfil:</span>
+              <span className="text-[10px] font-mono hidden lg:inline font-bold sis-text-muted">Perfil:</span>
               <select
                 value={currentRole}
                 onChange={e => setCurrentRole(e.target.value as UserRole)}
-                className={`text-xs font-mono font-bold px-2 py-1 rounded-lg border cursor-pointer focus:outline-none focus:border-sky-500 ${
-                  theme === 'light'
-                    ? 'bg-slate-100 border-slate-300 text-slate-900'
-                    : 'bg-slate-950 border-slate-700 text-sky-400'
-                }`}
-                title="Troca rápida de perfil de usuário para testar a visão de cada usuário"
+                className="text-xs font-mono font-bold px-2 py-1 rounded-lg border cursor-pointer focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
+                title="Troca rápida de perfil de usuário"
               >
                 {rolesList.map(r => (
-                  <option key={r.role} value={r.role}>
-                    {r.label}
-                  </option>
+                  <option key={r.role} value={r.role}>{r.label}</option>
                 ))}
               </select>
             </div>
 
-            {/* Backup JSON (Exportar e Importar Rápido no Navegador) */}
+            {/* Backup JSON */}
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={handleExportBackupCompleto}
-                className={`p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer shadow-xs ${
-                  theme === 'light'
-                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                    : 'bg-slate-800 hover:bg-slate-700 text-sky-300 border-slate-700'
-                }`}
-                title="Exportar backup completo em JSON (dados, mapa e cadastros)"
+                className="p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary sis-shadow-sm"
+                title="Exportar backup completo em JSON"
               >
                 <i className="fa-solid fa-download text-xs"></i>
                 <span className="hidden xl:inline text-[10px]">Backup JSON</span>
               </button>
-
               <label
-                className={`p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer shadow-xs ${
-                  theme === 'light'
-                    ? 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                    : 'bg-slate-800 hover:bg-slate-700 text-sky-300 border-slate-700'
-                }`}
-                title="Restaurar backup completo a partir de arquivo JSON"
+                className="p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary sis-shadow-sm"
+                title="Restaurar backup completo"
               >
                 <i className="fa-solid fa-upload text-xs"></i>
                 <span className="hidden xl:inline text-[10px]">Importar</span>
@@ -1317,46 +1301,46 @@ export default function App() {
               </label>
             </div>
 
-            {/* Indicador de Auditoria */}
-            <div className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs ${
-              theme === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-slate-950 border-slate-800'
-            }`}>
-              <span className={theme === 'light' ? 'text-slate-500' : 'text-slate-400'}>Score:</span>
-              <span className={`font-black ${auditScore >= 80 ? (theme === 'light' ? 'text-emerald-700' : 'text-emerald-400') : (theme === 'light' ? 'text-amber-700' : 'text-amber-400')}`}>
+            {/* Score de Auditoria */}
+            <div
+              className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs sis-bg-surface-subtle"
+              style={{ borderColor: 'var(--sis-border-main)' }}
+            >
+              <span className="sis-text-muted">Score:</span>
+              <span className="font-black" style={{ color: auditScore >= 80 ? 'var(--sis-green-text)' : 'var(--sis-yellow-text)' }}>
                 {auditScore}%
               </span>
             </div>
 
-            {/* Seletor de Tema no Cabeçalho */}
-            <div 
-              className={`flex items-center p-0.5 rounded-lg border shadow-xs transition-colors ${
-                theme === 'light' ? 'bg-slate-100 border-slate-300' : 'bg-slate-950 border-slate-800'
-              }`}
+            {/* Alternador de Tema */}
+            <div
+              className="flex items-center p-0.5 rounded-lg border shadow-xs transition-colors sis-bg-surface-subtle"
+              style={{ borderColor: 'var(--sis-border-main)' }}
               role="group"
               aria-label="Alternador de Tema Visual"
             >
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs ring-1 ring-amber-500/50'
-                    : 'text-slate-400 hover:text-slate-700'
-                }`}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer"
+                style={theme === 'light'
+                  ? { backgroundColor: '#FBBF24', color: '#0F172A', boxShadow: '0 1px 2px rgba(0,0,0,0.15)' }
+                  : { color: 'var(--sis-text-muted)' }
+                }
                 title="Ativar Tema Claro (Uso Diurno)"
                 aria-pressed={theme === 'light'}
               >
-                <i className="fa-solid fa-sun text-xs text-amber-950"></i>
+                <i className="fa-solid fa-sun text-xs"></i>
                 <span className="hidden sm:inline text-[11px] font-mono">Claro</span>
               </button>
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-sky-600 text-white font-black shadow-xs ring-1 ring-sky-400/50'
-                    : 'text-slate-400 hover:text-slate-700'
-                }`}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer"
+                style={theme === 'dark'
+                  ? { backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF', boxShadow: '0 1px 2px rgba(0,0,0,0.3)' }
+                  : { color: 'var(--sis-text-muted)' }
+                }
                 title="Ativar Tema Escuro (Uso Noturno)"
                 aria-pressed={theme === 'dark'}
               >
@@ -1366,17 +1350,13 @@ export default function App() {
             </div>
 
             <div className="text-right font-mono text-xs hidden lg:block">
-              <div className={`font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{data.header.teamLeader}</div>
-              <div className={`text-[10px] ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>{data.header.shift} • {data.header.date}</div>
+              <div className="font-bold sis-text-primary">{data.header.teamLeader}</div>
+              <div className="text-[10px] sis-text-muted">{data.header.shift} • {data.header.date}</div>
             </div>
 
-            <button 
+            <button
               onClick={() => openFormModal('efetivo')}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 cursor-pointer transition ${
-                theme === 'light'
-                  ? 'bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-300'
-                  : 'bg-slate-800 hover:bg-slate-700 text-sky-300 border-slate-700'
-              }`}
+              className="px-2.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 cursor-pointer transition sis-btn-primary sis-shadow-sm"
             >
               <i className="fa-solid fa-user-plus"></i>
               <span className="hidden sm:inline">Operador</span>
@@ -1406,11 +1386,11 @@ export default function App() {
           )}
           {activeTab === 'MAPA_CARDS' && (
             <div className="space-y-3">
-              <div className="flex justify-between items-center bg-slate-900 p-2.5 rounded-xl border border-slate-800">
-                <span className="text-xs font-bold text-sky-400">Visão em Cartões de Postos</span>
+              <div className="flex justify-between items-center p-2.5 rounded-xl border sis-bg-surface sis-shadow-sm" style={{ borderColor: 'var(--sis-border-main)' }}>
+                <span className="text-xs font-bold" style={{ color: 'var(--sis-blue-text)' }}>Visão em Cartões de Postos</span>
                 <button
                   onClick={() => setActiveTab('MAPA_LINHA')}
-                  className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1 cursor-pointer sis-btn-primary"
                 >
                   <i className="fa-solid fa-map-location-dot"></i> Voltar ao Mapa SVG
                 </button>

@@ -101,7 +101,6 @@ export function SidebarNavigation({
   onChangeRole,
   onSetTheme
 }: SidebarNavigationProps) {
-  // Controle de grupos expandidos/recolhidos
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     GRUPO_OPERACAO: true,
     GRUPO_QUALIDADE: false,
@@ -113,46 +112,42 @@ export function SidebarNavigation({
   });
 
   const toggleGroup = (groupId: string) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupId]: !prev[groupId]
-    }));
+    setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
   const rolesList: { role: UserRole; label: string }[] = [
-    { role: 'CONTA_MASTER', label: '👑 CONTA MÁSTER' },
-    { role: 'ADMINISTRADOR', label: '⚙️ ADMINISTRADOR' },
-    { role: 'SUPERVISAO', label: '👔 SUPERVISÃO' },
-    { role: 'LIDER', label: '🎖️ LÍDER DE LINHA' },
-    { role: 'TEAM_LEADER', label: '⭐ TEAM LEADER' },
-    { role: 'SEGURANCA', label: '🛡️ SEGURANÇA WHS' },
-    { role: 'OPERADOR', label: '🔧 OPERADOR' }
+    { role: 'CONTA_MASTER', label: 'CONTA MÁSTER' },
+    { role: 'ADMINISTRADOR', label: 'ADMINISTRADOR' },
+    { role: 'SUPERVISAO', label: 'SUPERVISÃO' },
+    { role: 'LIDER', label: 'LÍDER DE LINHA' },
+    { role: 'TEAM_LEADER', label: 'TEAM LEADER' },
+    { role: 'SEGURANCA', label: 'SEGURANÇA WHS' },
+    { role: 'OPERADOR', label: 'OPERADOR' }
   ];
 
   return (
     <aside
-      className={`transition-all duration-300 ease-in-out shrink-0 flex flex-col z-20 border-r select-none ${
+      className={`transition-all duration-300 ease-in-out shrink-0 flex flex-col z-20 border-r select-none sis-bg-surface ${
         collapsed ? 'w-16' : 'w-72'
-      } ${
-        theme === 'light'
-          ? 'bg-slate-100 border-slate-300 text-slate-800'
-          : 'bg-slate-900 border-slate-800 text-slate-200'
       }`}
+      style={{ borderColor: 'var(--sis-border-main)' }}
     >
-      {/* 1. Cabeçalho da Sidebar */}
-      <div className={`p-3 border-b flex items-center justify-between ${
-        theme === 'light' ? 'border-slate-300 bg-white' : 'border-slate-800 bg-slate-950/80'
-      }`}>
+      {/* Cabeçalho */}
+      <div
+        className="p-3 border-b flex items-center justify-between sis-bg-surface-elevated"
+        style={{ borderColor: 'var(--sis-border-main)' }}
+      >
         {!collapsed && (
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shrink-0 sis-shadow-sm"
+              style={{ backgroundColor: 'var(--sis-blue-primary)' }}>
               <i className="fa-solid fa-industry"></i>
             </div>
             <div className="flex flex-col truncate">
-              <span className="text-xs font-black tracking-wider text-sky-400 font-mono truncate">
+              <span className="text-xs font-black tracking-wider font-mono truncate" style={{ color: 'var(--sis-blue-text)' }}>
                 STELLANTIS
               </span>
-              <span className="text-[10px] font-bold text-slate-400 truncate">
+              <span className="text-[10px] font-bold truncate sis-text-muted">
                 SIS Totem Betim
               </span>
             </div>
@@ -161,118 +156,107 @@ export function SidebarNavigation({
 
         <button
           onClick={onToggleCollapsed}
-          className={`p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center ${
-            theme === 'light'
-              ? 'hover:bg-slate-200 text-slate-600'
-              : 'hover:bg-slate-800 text-slate-300'
-          }`}
+          className="p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center hover:opacity-80"
+          style={{ color: 'var(--sis-text-muted)' }}
           title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
         >
           <i className={`fa-solid ${collapsed ? 'fa-angles-right' : 'fa-angles-left'} text-sm`}></i>
         </button>
       </div>
 
-      {/* 2. Seletor de Perfil Ativo (Role Switcher) */}
+      {/* Seletor de Perfil */}
       {!collapsed && (
-        <div className={`p-2.5 border-b text-xs ${
-          theme === 'light' ? 'border-slate-300 bg-slate-50' : 'border-slate-800 bg-slate-950/40'
-        }`}>
+        <div
+          className="p-2.5 border-b text-xs sis-bg-surface-subtle"
+          style={{ borderColor: 'var(--sis-border-main)' }}
+        >
           <div className="flex items-center justify-between mb-1 px-1">
-            <span className="text-[10px] uppercase font-mono font-bold text-slate-400">
-              Perfil Ativo:
-            </span>
-            <span className="text-[10px] font-mono font-bold text-sky-400">
+            <span className="text-[10px] uppercase font-mono font-bold sis-text-muted">Perfil Ativo:</span>
+            <span className="text-[10px] font-mono font-bold" style={{ color: 'var(--sis-blue-text)' }}>
               {currentRole}
             </span>
           </div>
           <select
             value={currentRole}
             onChange={(e) => onChangeRole(e.target.value as UserRole)}
-            className={`w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition cursor-pointer font-mono ${
-              theme === 'light'
-                ? 'bg-white border-slate-300 text-slate-900 shadow-xs'
-                : 'bg-slate-900 border-slate-700 text-white shadow-inner'
-            }`}
+            className="w-full py-1.5 px-2 rounded-lg text-xs font-bold border transition cursor-pointer font-mono sis-input-bg sis-input-border sis-input-text sis-shadow-sm"
           >
             {rolesList.map(r => (
-              <option key={r.role} value={r.role} className="bg-slate-900 text-white">
-                {r.label}
-              </option>
+              <option key={r.role} value={r.role}>{r.label}</option>
             ))}
           </select>
         </div>
       )}
 
-      {/* 3. Lista de Grupos Expansíveis e Submenus */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1.5 scrollbar-thin">
+      {/* Lista de Grupos */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1.5">
         {NAVIGATION_MENU_CONFIG.map(group => {
           const isExpanded = expandedGroups[group.id] ?? false;
           const hasActiveChild = group.children?.some(c => c.id === activeTab);
 
           return (
             <div key={group.id} className="rounded-xl overflow-hidden">
-              {/* Botão do Cabeçalho do Grupo */}
               <button
                 onClick={() => toggleGroup(group.id)}
                 className={`w-full flex items-center justify-between p-2 rounded-lg text-xs font-bold transition cursor-pointer ${
-                  hasActiveChild
-                    ? theme === 'light' ? 'bg-sky-100 text-sky-900' : 'bg-sky-950/50 text-sky-300'
-                    : theme === 'light' ? 'hover:bg-slate-200 text-slate-700' : 'hover:bg-slate-800 text-slate-300'
+                  hasActiveChild ? '' : 'hover:opacity-80'
                 }`}
+                style={hasActiveChild
+                  ? { backgroundColor: 'var(--sis-blue-bg)', color: 'var(--sis-blue-text)' }
+                  : { color: 'var(--sis-text-secondary)' }
+                }
                 title={collapsed ? group.label : undefined}
               >
                 <div className="flex items-center gap-2.5 truncate">
                   <i className={`fa-solid ${group.icon} text-sm w-4 text-center ${
-                    hasActiveChild ? 'text-sky-400' : 'text-slate-400'
-                  }`}></i>
+                    hasActiveChild ? '' : ''
+                  }`} style={{ color: hasActiveChild ? 'var(--sis-blue-text)' : 'var(--sis-text-muted)' }}></i>
                   {!collapsed && <span className="truncate">{group.label}</span>}
                 </div>
-
                 {!collapsed && (
                   <i
-                    className={`fa-solid fa-chevron-down text-[10px] transition-transform duration-200 text-slate-400 ${
+                    className={`fa-solid fa-chevron-down text-[10px] transition-transform duration-200 ${
                       isExpanded ? 'rotate-180' : ''
                     }`}
+                    style={{ color: 'var(--sis-text-muted)' }}
                   ></i>
                 )}
               </button>
 
-              {/* Lista de Submenus do Grupo */}
               {isExpanded && group.children && (
-                <div className={`mt-1 space-y-0.5 ${!collapsed ? 'pl-4 border-l-2 ml-3' : ''} ${
-                  theme === 'light' ? 'border-slate-300' : 'border-slate-800'
-                }`}>
+                <div
+                  className={`mt-1 space-y-0.5 ${!collapsed ? 'pl-4 border-l-2 ml-3' : ''}`}
+                  style={{ borderColor: 'var(--sis-border-main)' }}
+                >
                   {group.children.map(item => {
                     const isActive = activeTab === item.id;
-
                     return (
                       <button
                         key={item.id}
                         onClick={() => onSelectTab(item.id)}
                         className={`w-full flex items-center justify-between py-1.5 px-2 rounded-lg text-xs font-semibold transition cursor-pointer text-left ${
-                          isActive
-                            ? 'bg-sky-600 text-white shadow font-bold'
-                            : theme === 'light'
-                            ? 'hover:bg-slate-200 text-slate-700'
-                            : 'hover:bg-slate-800/80 text-slate-300'
+                          isActive ? 'shadow font-bold' : 'hover:opacity-80'
                         }`}
+                        style={isActive
+                          ? { backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF' }
+                          : { color: 'var(--sis-text-secondary)' }
+                        }
                         title={collapsed ? item.label : undefined}
                       >
                         <div className="flex items-center gap-2 truncate">
                           <i
-                            className={`fa-solid ${item.icon} text-xs w-4 text-center ${
-                              isActive ? 'text-white' : 'text-sky-500/80'
-                            }`}
+                            className={`fa-solid ${item.icon} text-xs w-4 text-center`}
+                            style={{ color: isActive ? '#FFFFFF' : 'var(--sis-blue-text)' }}
                           ></i>
                           {!collapsed && <span className="truncate">{item.label}</span>}
                         </div>
                         {!collapsed && item.badge && (
                           <span
-                            className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
-                              isActive
-                                ? 'bg-white/20 text-white'
-                                : 'bg-slate-800 text-sky-300 border border-slate-700'
-                            }`}
+                            className="text-[9px] font-mono px-1.5 py-0.2 rounded font-bold"
+                            style={isActive
+                              ? { backgroundColor: 'rgba(255,255,255,0.2)', color: '#FFFFFF' }
+                              : { backgroundColor: 'var(--sis-bg-surface-elevated)', color: 'var(--sis-blue-text)', border: '1px solid var(--sis-border-main)' }
+                            }
                           >
                             {item.badge}
                           </span>
@@ -287,43 +271,48 @@ export function SidebarNavigation({
         })}
       </div>
 
-      {/* 4. Rodapé da Sidebar com Seletor de Tema e Versão */}
-      <div className="flex flex-col border-t border-slate-800">
+      {/* Rodapé: Seletor de Tema + Versão */}
+      <div className="flex flex-col border-t" style={{ borderColor: 'var(--sis-border-main)' }}>
         {!collapsed && onSetTheme && (
-          <div className={`p-2 border-b ${theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/80 border-slate-800'}`}>
+          <div className="p-2 border-b sis-bg-surface-subtle" style={{ borderColor: 'var(--sis-border-subtle)' }}>
             <div className="flex items-center justify-between px-1 mb-1.5">
-              <span className="text-[10px] font-mono text-slate-400 uppercase font-bold tracking-wider">
+              <span className="text-[10px] font-mono uppercase font-bold tracking-wider sis-text-muted">
                 Tema Visual:
               </span>
-              <span className="text-[10px] font-mono font-bold text-sky-400">
-                {theme === 'light' ? '☀️ Modo Claro' : '🌙 Modo Escuro'}
+              <span className="text-[10px] font-mono font-bold" style={{ color: 'var(--sis-blue-text)' }}>
+                {theme === 'light' ? 'Modo Claro' : 'Modo Escuro'}
               </span>
             </div>
-            <div className={`grid grid-cols-2 gap-1 p-1 rounded-lg border ${
-              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-            }`}>
+            <div
+              className="grid grid-cols-2 gap-1 p-1 rounded-lg border sis-bg-surface"
+              style={{ borderColor: 'var(--sis-border-main)' }}
+            >
               <button
                 type="button"
                 onClick={() => onSetTheme('light')}
                 className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-bold transition cursor-pointer ${
-                  theme === 'light'
-                    ? 'bg-amber-400 text-slate-950 font-black shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                  theme === 'light' ? 'shadow-xs font-black' : 'hover:opacity-80'
                 }`}
+                style={theme === 'light'
+                  ? { backgroundColor: '#FBBF24', color: '#0F172A' }
+                  : { color: 'var(--sis-text-muted)' }
+                }
               >
-                <i className="fa-solid fa-sun text-xs text-amber-500"></i>
+                <i className="fa-solid fa-sun text-xs"></i>
                 <span className="text-[10px]">Claro</span>
               </button>
               <button
                 type="button"
                 onClick={() => onSetTheme('dark')}
                 className={`flex items-center justify-center gap-1.5 py-1 px-2 rounded-md text-xs font-bold transition cursor-pointer ${
-                  theme === 'dark'
-                    ? 'bg-sky-600 text-white font-black shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                  theme === 'dark' ? 'shadow-xs font-black' : 'hover:opacity-80'
                 }`}
+                style={theme === 'dark'
+                  ? { backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF' }
+                  : { color: 'var(--sis-text-muted)' }
+                }
               >
-                <i className="fa-solid fa-moon text-xs text-sky-400"></i>
+                <i className="fa-solid fa-moon text-xs"></i>
                 <span className="text-[10px]">Escuro</span>
               </button>
             </div>
@@ -331,9 +320,7 @@ export function SidebarNavigation({
         )}
 
         {!collapsed && (
-          <div className={`p-2 text-[10px] text-center font-mono ${
-            theme === 'light' ? 'bg-slate-50 text-slate-500' : 'bg-slate-950 text-slate-500'
-          }`}>
+          <div className="p-2 text-[10px] text-center font-mono sis-bg-surface-subtle sis-text-muted">
             SIS Totem Stellantis • Betim VHI v5.4
           </div>
         )}
