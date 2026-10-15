@@ -51,8 +51,22 @@ const TRECHOS_OFICIAIS: TrechoOficialInfo[] = [
   { id: 'TRECHO-L3-BIG-CHASSI', nome: 'BIG CHASSI', pdtFaixa: '94 AO 108', totalTotens: 2, posicaoTotens: '95 ; 102', corHex: '#06b6d4', corTexto: '#ffffff', borderHex: '#0891b2' },
   { id: 'TRECHO-L3-FINAL', nome: 'FINAL', pdtFaixa: '109 AO 150', totalTotens: 4, posicaoTotens: '109 ; 120 ; 130 ; 140', corHex: '#d946ef', corTexto: '#ffffff', borderHex: '#a21caf' },
   { id: 'TRECHO-L3-DOORS', nome: 'DOORS', pdtFaixa: '1 AO 17', totalTotens: 2, posicaoTotens: '1 ; 7', corHex: '#15803d', corTexto: '#ffffff', borderHex: '#166534' },
-  { id: 'TRECHO-L3-BIG-DOORS', nome: 'BIG DOORS', pdtFaixa: '18 AO 22', totalTotens: 1, posicaoTotens: '18', corHex: '#38bdf8', corTexto: '#ffffff', borderHex: '#0284c7' },
 ];
+
+export const getTrechoPillClass = (trechoId: string): string => {
+  switch (trechoId) {
+    case 'TRECHO-L3-PLANCIA': return 'trecho-pill-plancia';
+    case 'TRECHO-L3-DOORS': return 'trecho-pill-doors';
+    case 'TRECHO-L3-BIG-DOORS': return 'trecho-pill-big-doors';
+    case 'TRECHO-L3-BIG-SWIVEL': return 'trecho-pill-big-swivel';
+    case 'TRECHO-L3-SWIVEL': return 'trecho-pill-swivel';
+    case 'TRECHO-L3-TRIM': return 'trecho-pill-trim';
+    case 'TRECHO-L3-CHASSI': return 'trecho-pill-chassi';
+    case 'TRECHO-L3-BIG-CHASSI': return 'trecho-pill-big-chassi';
+    case 'TRECHO-L3-FINAL': return 'trecho-pill-final';
+    default: return 'trecho-pill-trim';
+  }
+};
 
 export function MapaLinhaSvgView({
   currentRole = 'TEAM_LEADER',
@@ -146,8 +160,8 @@ export function MapaLinhaSvgView({
   const [mostrarTotens, setMostrarTotens] = useState(true);
   const [trechosVisiveis, setTrechosVisiveis] = useState<string[]>(() => TRECHOS_OFICIAIS.map(trecho => trecho.id));
 
-  // Orientação da Visualização (Anti-horário ativado por padrão para layout paisagem)
-  const [isRotatedAntiHorario, setIsRotatedAntiHorario] = useState(true);
+  // Orientação da Visualização (Fixo na posição atual: Layout Paisagem / Anti-horário oficial Betim)
+  const isRotatedAntiHorario = true;
   const [modalLegendaOpen, setModalLegendaOpen] = useState(false);
 
   // Elementos sendo arrastados no Modo Edição
@@ -272,6 +286,67 @@ export function MapaLinhaSvgView({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Estados Mobile: Zoom, Pan, Touch e Fullscreen (Padrão Internacional)
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isTouchPanning, setIsTouchPanning] = useState(false);
+  const [touchStartPos, setTouchStartPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [showRotateHint, setShowRotateHint] = useState<boolean>(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && zoomLevel > 1) {
+      setIsTouchPanning(true);
+      setTouchStartPos({
+        x: e.touches[0].clientX - panOffset.x,
+        y: e.touches[0].clientY - panOffset.y
+      });
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isTouchPanning && e.touches.length === 1 && zoomLevel > 1) {
+      setPanOffset({
+        x: e.touches[0].clientX - touchStartPos.x,
+        y: e.touches[0].clientY - touchStartPos.y
+      });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsTouchPanning(false);
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(2.5, +(prev + 0.3).toFixed(1)));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => {
+      const next = Math.max(1, +(prev - 0.3).toFixed(1));
+      if (next === 1) setPanOffset({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  const handleZoomReset = () => {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen?.().catch(() => {
+        setIsFullscreen(!isFullscreen);
+      });
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+      setIsFullscreen(false);
+    }
+  };
 
   // Sincroniza busca externa
   useEffect(() => {
@@ -834,56 +909,69 @@ export function MapaLinhaSvgView({
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#090d16] text-slate-100 font-sans select-none overflow-hidden print:bg-white print:text-black">
-      {/* 1. Barra de Ferramentas Superior — Configurações e Ações */}
-      <div className="bg-slate-900 border-b border-slate-800 text-white px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0 print:hidden shadow-md">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className={`w-3 h-3 rounded-full ${modoEdicao ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`}></span>
-            <span className="font-bold text-sm tracking-wide">
-              {modoEdicao ? 'Editor de Mapa & Hierarquia (Layout Builder)' : 'Mapa de Produção Oficial (Betim)'}
+    <div className="flex flex-col h-full sis-bg-app sis-text-primary font-sans select-none overflow-hidden print:bg-white print:text-black">
+      {/* 1. Barra de Ferramentas Superior — Compacta e Otimizada com Contraste Internacional */}
+      <div className="sis-bg-surface border-b sis-border-main sis-text-primary px-3 py-1 flex items-center justify-between gap-2 shrink-0 print:hidden shadow-xs min-h-[38px] overflow-x-auto text-xs">
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${modoEdicao ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+            <span className="font-bold text-xs tracking-wide whitespace-nowrap sis-text-primary">
+              {modoEdicao ? 'Editor de Mapa' : 'Mapa Betim — Linha 3'}
             </span>
-            <span className="text-xs text-sky-400 font-mono bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/60">
-              {isRotatedAntiHorario ? 'Anti-horário (Paisagem)' : 'Retrato'}
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border hidden sm:inline sis-badge-info font-bold">
+              Paisagem Oficial
             </span>
           </div>
 
-          <div className="h-4 w-px bg-slate-700"></div>
+          <div className="h-3.5 w-px border-r sis-border-main"></div>
 
           {/* Seletor de Linha */}
-          <div className="flex items-center gap-1 bg-slate-800 p-0.5 rounded-lg border border-slate-700 text-xs">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-md border text-[11px] sis-bg-surface-elevated sis-border-main">
             <button
               onClick={() => setSelectedLinha('L3')}
-              className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer ${
-                selectedLinha === 'L3' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`px-2 py-0.5 rounded font-bold transition cursor-pointer ${
+                selectedLinha === 'L3' ? 'sis-btn-primary shadow-xs' : 'sis-text-muted hover:sis-text-primary'
               }`}
             >
-              Linha 3 (Oficial Betim)
+              L3
             </button>
             <button
               onClick={() => setSelectedLinha('L1')}
-              className={`px-2.5 py-1 rounded-md font-bold transition cursor-pointer ${
-                selectedLinha === 'L1' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-white'
+              className={`px-2 py-0.5 rounded font-bold transition cursor-pointer ${
+                selectedLinha === 'L1' ? 'sis-btn-primary shadow-xs' : 'sis-text-muted hover:sis-text-primary'
               }`}
             >
-              Linha 1
+              L1
             </button>
           </div>
+
+          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border hidden md:inline sis-bg-surface-elevated sis-text-muted sis-border-subtle font-semibold">
+            150 PDTs • 9 Trechos
+          </span>
+
+          <button
+            onClick={() => setModalLegendaOpen(true)}
+            className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold transition flex items-center gap-1 cursor-pointer sis-btn-secondary"
+            title="Visualizar tabela de trechos e totens"
+          >
+            <i className="fa-solid fa-list-check text-[10px]"></i>
+            <span className="hidden lg:inline">Legenda</span>
+          </button>
         </div>
 
-        {/* Controles de Busca, Modos, Rotação e Edição (Sem Zoom Manual) */}
-        <div className="flex items-center gap-2">
+        {/* Controles de Busca, Modos e Edição */}
+        <div className="flex items-center gap-1.5 shrink-0">
           {/* Campo de Busca Rápida por Posto */}
           <div className="relative">
             <input
               type="text"
-              placeholder="Buscar PDT ou Operador..."
+              placeholder="Buscar posto..."
               value={buscaTerm}
               onChange={e => setBuscaTerm(e.target.value)}
-              className="bg-slate-950 border border-slate-700 px-2.5 py-1 rounded-lg text-white text-xs font-mono placeholder:text-slate-500 w-36 focus:outline-none focus:border-sky-500"
+              className="px-2 py-0.5 rounded-md text-xs font-mono w-28 sm:w-36 focus:outline-none sis-input-bg sis-input-border sis-input-text border"
             />
             {buscaTerm && (
-              <button onClick={() => setBuscaTerm('')} className="absolute right-2 top-1 text-slate-400 hover:text-white text-xs">
+              <button onClick={() => setBuscaTerm('')} className="absolute right-1.5 top-0.5 sis-text-muted hover:sis-text-primary text-xs">
                 ✕
               </button>
             )}
@@ -892,59 +980,47 @@ export function MapaLinhaSvgView({
           {/* Alternador de Totens */}
           <button
             onClick={() => setMostrarTotens(!mostrarTotens)}
-            className={`px-2 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer ${
-              mostrarTotens ? 'bg-sky-950/60 text-sky-300 border-sky-600' : 'bg-slate-800 text-slate-400 border-slate-700'
+            className={`px-2 py-0.5 rounded-md text-xs font-bold border transition flex items-center gap-1 cursor-pointer ${
+              mostrarTotens ? 'sis-badge-info' : 'sis-btn-secondary'
             }`}
             title="Exibir/Ocultar Totens Digitais"
           >
-            <i className="fa-solid fa-desktop text-[10px]"></i> Totens
+            <i className="fa-solid fa-desktop text-[10px]"></i>
+            <span className="hidden sm:inline">Totens</span>
           </button>
 
-          {/* Botão Girar Anti-horário / Retrato */}
-          <button
-            onClick={() => setIsRotatedAntiHorario(!isRotatedAntiHorario)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold border transition flex items-center gap-1.5 cursor-pointer ${
-              isRotatedAntiHorario
-                ? 'bg-sky-950/80 text-sky-300 border-sky-600 shadow'
-                : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-            }`}
-            title="Alternar entre Rotação Anti-Horária (Paisagem) e Retrato"
-          >
-            <i className="fa-solid fa-rotate-left"></i>
-            <span>{isRotatedAntiHorario ? 'Anti-horário' : 'Girar 90°'}</span>
-          </button>
-
-          {/* Gestão de Colaboradores por Domínio (Regra do Rodapé) */}
+          {/* Gestão de Colaboradores por Domínio */}
           <button
             onClick={() => setModalGestaoColaboradoresOpen(true)}
-            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-bold border border-slate-700 transition flex items-center gap-1 cursor-pointer shadow-xs"
-            title="Regra do Rodapé: Domínios gerenciam PDTs e Colaboradores"
+            className="px-2 py-0.5 rounded-md text-xs font-bold border transition flex items-center gap-1 cursor-pointer shadow-xs sis-badge-ok"
+            title="Domínios gerenciam PDTs e Colaboradores"
           >
-            <i className="fa-solid fa-users-gear text-xs"></i>
-            <span>Colaboradores</span>
+            <i className="fa-solid fa-users-gear text-[10px]"></i>
+            <span className="hidden sm:inline">Colaboradores</span>
           </button>
 
           {/* Botão de Ativação do Modo Edição */}
           <button
             onClick={() => setModoEdicao(!modoEdicao)}
-            className={`px-3 py-1 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer shadow ${
+            className={`px-2.5 py-0.5 rounded-md text-xs font-bold border transition flex items-center gap-1 cursor-pointer shadow-xs ${
               modoEdicao
-                ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-400/30'
-                : 'bg-slate-800 text-slate-300 hover:text-white border-slate-700 hover:bg-slate-700'
+                ? 'sis-badge-warn font-extrabold ring-1 ring-amber-500/50'
+                : 'sis-btn-secondary'
             }`}
             title="Alternar entre visualização operacional e modo de edição visual"
           >
-            <i className="fa-solid fa-pen-ruler"></i>
-            <span>{modoEdicao ? 'Edição Ativa' : 'Editar Mapa'}</span>
+            <i className="fa-solid fa-pen-ruler text-[10px]"></i>
+            <span>{modoEdicao ? 'Edição' : 'Editar'}</span>
           </button>
 
           {/* Botão Imprimir */}
           <button
             onClick={printDocument}
-            className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow"
+            className="px-2 py-0.5 rounded-md text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-xs sis-btn-primary"
+            title="Imprimir Mapa"
           >
-            <i className="fa-solid fa-print"></i>
-            <span>Imprimir</span>
+            <i className="fa-solid fa-print text-[10px]"></i>
+            <span className="hidden md:inline">Imprimir</span>
           </button>
         </div>
       </div>
@@ -1013,47 +1089,86 @@ export function MapaLinhaSvgView({
         ref={containerRef}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        className="flex-1 overflow-hidden flex flex-col items-center justify-center p-2 sm:p-3 bg-[#090d16] text-white sis-grid-bg relative select-none"
+        className="flex-1 overflow-hidden flex flex-col items-center justify-center p-0.5 sm:p-1 bg-[#090d16] text-white sis-grid-bg relative select-none min-h-0 w-full h-full"
       >
-        <div className="w-full h-full max-h-[calc(100vh-140px)] flex flex-col bg-[#070b13] border border-slate-800/90 rounded-2xl shadow-2xl p-2 sm:p-3 relative overflow-hidden">
-          {/* Header do Board Técnico */}
-          <div className="flex items-center justify-between pb-2 mb-1 border-b border-slate-800/80 px-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
-              <h1 className="text-xs sm:text-sm font-bold text-slate-100 font-mono tracking-wider uppercase">
-                Linha 3 Betim • {isRotatedAntiHorario ? 'Layout Paisagem (Anti-Horário)' : 'Layout Retrato Oficial'}
-              </h1>
-              <span className="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded border border-slate-800 hidden sm:inline">
-                150 PDTs • 9 Trechos
+        <div className="w-full h-full flex flex-col bg-[#070b13] border border-slate-800/90 rounded-xl shadow-xl p-1 relative overflow-hidden flex-1 min-h-0">
+          {/* Dica de Orientação para Mobile */}
+          {showRotateHint && (
+            <div className="sm:hidden bg-sky-950/95 text-sky-200 border-b border-sky-800 text-[10px] px-2.5 py-1 flex items-center justify-between gap-1.5 shrink-0 z-20">
+              <span className="flex items-center gap-1.5 truncate">
+                <i className="fa-solid fa-mobile-screen-button rotate-90 text-sky-400 shrink-0"></i>
+                <span className="truncate">Gire o celular na horizontal para ver a Linha 3 completa.</span>
               </span>
-            </div>
-
-            <div className="flex items-center gap-2">
               <button
-                onClick={() => setModalLegendaOpen(true)}
-                className="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg text-xs font-mono font-bold border border-slate-700 transition flex items-center gap-1 cursor-pointer"
-                title="Visualizar tabela de trechos e totens"
+                type="button"
+                onClick={() => setShowRotateHint(false)}
+                className="text-sky-400 hover:text-white px-1 text-xs cursor-pointer font-bold shrink-0 min-w-[24px] min-h-[24px] flex items-center justify-center"
+                aria-label="Dispensar dica"
               >
-                <i className="fa-solid fa-list-check"></i>
-                <span className="hidden sm:inline">Legenda</span>
+                ✕
               </button>
-
-              {modoEdicao && (
-                <span className="text-[10px] font-mono text-amber-400 bg-amber-950/60 px-2.5 py-0.5 rounded border border-amber-500/50 flex items-center gap-1.5 font-bold animate-pulse">
-                  <i className="fa-solid fa-pen-ruler"></i> MODO EDIÇÃO
-                </span>
-              )}
             </div>
-          </div>
+          )}
 
-          {/* SVG Enquadrado com Grade Quadriculada Técnica Preta */}
-          <div className="flex-1 w-full h-full flex items-center justify-center overflow-hidden">
+          {/* SVG Enquadrado com Grade Quadriculada Técnica Preta - Suporte a Touch & Zoom Mobile */}
+          <div
+            className="flex-1 w-full h-full flex items-center justify-center overflow-hidden min-h-0 relative touch-none"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {/* Controles Flutuantes de Zoom & Fullscreen (Mobile / Tablet) */}
+            <div className="absolute top-2 right-2 flex items-center gap-1 bg-slate-900/90 border border-slate-700/80 rounded-lg p-1 shadow-lg z-20 backdrop-blur-xs select-none">
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                className="w-7 h-7 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer active:scale-95"
+                title="Aumentar Zoom (+)"
+                aria-label="Aumentar Zoom"
+              >
+                <i className="fa-solid fa-plus text-[10px]"></i>
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomReset}
+                className="px-1.5 h-7 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[10px] font-mono font-bold transition cursor-pointer active:scale-95"
+                title="Resetar Zoom (100%)"
+                aria-label="Resetar Zoom"
+              >
+                {Math.round(zoomLevel * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                className="w-7 h-7 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition cursor-pointer active:scale-95"
+                title="Diminuir Zoom (-)"
+                aria-label="Diminuir Zoom"
+              >
+                <i className="fa-solid fa-minus text-[10px]"></i>
+              </button>
+              <div className="h-4 w-px bg-slate-700 my-auto"></div>
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="w-7 h-7 flex items-center justify-center rounded bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition cursor-pointer active:scale-95"
+                title="Tela Cheia"
+                aria-label="Alternar Tela Cheia"
+              >
+                <i className={`fa-solid ${isFullscreen ? 'fa-compress' : 'fa-expand'} text-[10px]`}></i>
+              </button>
+            </div>
+
             <svg
               ref={svgRef}
-              viewBox={isRotatedAntiHorario ? "0 0 780 300" : "0 0 680 820"}
-              className="w-full h-full max-h-[calc(100vh-210px)] object-contain select-none"
+              viewBox="0 0 780 300"
+              className="w-full h-full object-contain select-none"
               preserveAspectRatio="xMidYMid meet"
               onClick={handleMapClick}
+              style={{
+                transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                transformOrigin: 'center center',
+                transition: isTouchPanning ? 'none' : 'transform 0.15s ease-out'
+              }}
             >
               {/* Grade Técnica Industrial de Fundo (Checkered Black Pattern) */}
               <defs>
@@ -1232,46 +1347,54 @@ export function MapaLinhaSvgView({
           </svg>
           </div>
 
-          {/* Faixa Inferior Compacta: Legenda de Trechos em Pills */}
-          <div className="flex items-center justify-between pt-2 mt-1 border-t border-slate-800/80 px-2 shrink-0 text-[10px] font-mono text-slate-400 overflow-x-auto gap-2">
+          {/* Faixa Inferior Compacta: Legenda de Trechos em Pills com Contraste WCAG AAA */}
+          <div
+            className="flex items-center justify-between pt-1.5 pb-0.5 mt-1 border-t px-2 shrink-0 text-[10px] font-mono overflow-x-auto gap-2 sis-bg-surface-elevated"
+            style={{ borderColor: 'var(--sis-border-main)' }}
+          >
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-slate-300">TRECHOS:</span>
+              <span className="font-bold tracking-wider sis-text-primary text-[10px] uppercase">
+                TRECHOS:
+              </span>
               {TRECHOS_OFICIAIS.map(trecho => {
                 const ativo = trechosVisiveis.includes(trecho.id);
+                const pillClass = getTrechoPillClass(trecho.id);
                 return (
                   <button
                     key={trecho.id}
                     type="button"
                     onClick={() => toggleTrechoVisibilidade(trecho.id)}
-                    className={`flex items-center gap-1 px-2 py-0.5 rounded border transition cursor-pointer ${
-                      ativo ? 'opacity-100 ring-1 ring-white/20' : 'opacity-35 line-through'
+                    className={`flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold font-mono transition cursor-pointer shadow-xs select-none ${
+                      ativo
+                        ? `${pillClass} ring-1 ring-black/10`
+                        : 'opacity-40 line-through sis-bg-surface sis-border-subtle sis-text-muted'
                     }`}
-                    style={{
-                      color: trecho.corHex,
-                      backgroundColor: `${trecho.corHex}18`,
-                      borderColor: `${trecho.corHex}80`
-                    }}
                     title={ativo ? `Ocultar ${trecho.nome}` : `Exibir ${trecho.nome}`}
                   >
-                    <span className="w-2 h-2 rounded-xs" style={{ backgroundColor: trecho.corHex }} />
-                    {trecho.nome} ({trecho.pdtFaixa.replace(' AO ', '-')})
+                    <span className="w-2.5 h-2.5 rounded-xs shrink-0 shadow-xs border border-black/20" style={{ backgroundColor: trecho.corHex }} />
+                    <span>{trecho.nome}</span>
+                    <span className="opacity-75 font-normal">({trecho.pdtFaixa.replace(' AO ', '-')})</span>
                   </button>
                 );
               })}
               <button
                 type="button"
                 onClick={() => setTrechosVisiveis(TRECHOS_OFICIAIS.map(trecho => trecho.id))}
-                className="px-2 py-0.5 rounded border border-sky-600/70 bg-sky-950/60 text-sky-300 hover:bg-sky-900/70 transition cursor-pointer font-bold"
+                className="px-2 py-0.5 rounded-md text-[10px] font-bold border transition cursor-pointer sis-btn-primary shadow-xs flex items-center gap-1"
+                title="Exibir todos os 9 trechos da linha"
               >
-                Exibir todos
+                <i className="fa-solid fa-eye text-[9px]"></i>
+                <span>Exibir todos</span>
               </button>
             </div>
 
             <button
               onClick={() => setModalLegendaOpen(true)}
-              className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 text-sky-400 rounded text-[10px] border border-slate-700 transition cursor-pointer shrink-0 flex items-center gap-1"
+              className="px-2 py-0.5 rounded-md text-[10px] font-bold border transition cursor-pointer shrink-0 flex items-center gap-1 sis-btn-secondary shadow-xs"
+              title="Visualizar tabela oficial detalhada de trechos e totens"
             >
-              <i className="fa-solid fa-table-list"></i> Tabela Completa
+              <i className="fa-solid fa-table-list text-[10px]" style={{ color: 'var(--sis-blue-text)' }}></i>
+              <span>Tabela Completa</span>
             </button>
           </div>
         </div>

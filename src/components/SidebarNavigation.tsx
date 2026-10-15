@@ -3,6 +3,14 @@ import { NavigationMenuItem, UserRole } from '../types/mapa';
 
 export const NAVIGATION_MENU_CONFIG: NavigationMenuItem[] = [
   {
+    id: 'GRUPO_GUIA',
+    label: '0. Guia & Infográficos',
+    icon: 'fa-book-open',
+    children: [
+      { id: 'GUIA_INFOGRAFICO', label: 'Guia Geral do Aplicativo', icon: 'fa-chalkboard-user', badge: 'Infográficos' }
+    ]
+  },
+  {
     id: 'GRUPO_OPERACAO',
     label: '1. Operação',
     icon: 'fa-diagram-project',
@@ -89,6 +97,8 @@ interface SidebarNavigationProps {
   currentRole: UserRole;
   onChangeRole: (role: UserRole) => void;
   onSetTheme?: (theme: 'light' | 'dark') => void;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
 export function SidebarNavigation({
@@ -99,9 +109,12 @@ export function SidebarNavigation({
   theme,
   currentRole,
   onChangeRole,
-  onSetTheme
+  onSetTheme,
+  mobileOpen = false,
+  onCloseMobile
 }: SidebarNavigationProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    GRUPO_GUIA: true,
     GRUPO_OPERACAO: true,
     GRUPO_QUALIDADE: false,
     GRUPO_SEGURANCA: false,
@@ -115,6 +128,11 @@ export function SidebarNavigation({
     setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
   };
 
+  const handleSelectTab = (tabId: string) => {
+    onSelectTab(tabId);
+    if (onCloseMobile) onCloseMobile();
+  };
+
   const rolesList: { role: UserRole; label: string }[] = [
     { role: 'CONTA_MASTER', label: 'CONTA MÁSTER' },
     { role: 'ADMINISTRADOR', label: 'ADMINISTRADOR' },
@@ -126,43 +144,73 @@ export function SidebarNavigation({
   ];
 
   return (
-    <aside
-      className={`transition-all duration-300 ease-in-out shrink-0 flex flex-col z-20 border-r select-none sis-bg-surface ${
-        collapsed ? 'w-16' : 'w-72'
-      }`}
-      style={{ borderColor: 'var(--sis-border-main)' }}
-    >
-      {/* Cabeçalho */}
-      <div
-        className="p-3 border-b flex items-center justify-between sis-bg-surface-elevated"
-        style={{ borderColor: 'var(--sis-border-main)' }}
-      >
-        {!collapsed && (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shrink-0 sis-shadow-sm"
-              style={{ backgroundColor: 'var(--sis-blue-primary)' }}>
-              <i className="fa-solid fa-industry"></i>
-            </div>
-            <div className="flex flex-col truncate">
-              <span className="text-xs font-black tracking-wider font-mono truncate" style={{ color: 'var(--sis-blue-text)' }}>
-                STELLANTIS
-              </span>
-              <span className="text-[10px] font-bold truncate sis-text-muted">
-                SIS Totem Betim
-              </span>
-            </div>
-          </div>
-        )}
+    <>
+      {/* Backdrop para Mobile */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-40 backdrop-blur-xs md:hidden animate-in fade-in duration-200 cursor-pointer"
+          onClick={onCloseMobile}
+          aria-hidden="true"
+        />
+      )}
 
-        <button
-          onClick={onToggleCollapsed}
-          className="p-1.5 rounded-lg transition cursor-pointer flex items-center justify-center hover:opacity-80"
-          style={{ color: 'var(--sis-text-muted)' }}
-          title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+      <aside
+        className={`transition-all duration-300 ease-in-out shrink-0 flex flex-col z-50 md:z-20 border-r select-none sis-bg-surface
+          fixed inset-y-0 left-0 max-w-[85vw] shadow-2xl md:shadow-none md:static md:translate-x-0
+          ${mobileOpen ? 'translate-x-0 w-72' : '-translate-x-full md:translate-x-0'}
+          ${collapsed ? 'md:w-16' : 'md:w-72'}
+        `}
+        style={{ borderColor: 'var(--sis-border-main)' }}
+        aria-label="Menu Principal de Navegação"
+      >
+        {/* Cabeçalho */}
+        <div
+          className="p-3 border-b flex items-center justify-between sis-bg-surface-elevated min-h-[52px]"
+          style={{ borderColor: 'var(--sis-border-main)' }}
         >
-          <i className={`fa-solid ${collapsed ? 'fa-angles-right' : 'fa-angles-left'} text-sm`}></i>
-        </button>
-      </div>
+          {(!collapsed || mobileOpen) && (
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm shrink-0 sis-shadow-sm sis-brand-icon"
+                style={{ backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF' }}
+              >
+                <i className="fa-solid fa-industry" style={{ color: '#FFFFFF' }}></i>
+              </div>
+              <div className="flex flex-col truncate">
+                <span className="text-xs font-black tracking-wider font-mono truncate" style={{ color: 'var(--sis-blue-text)' }}>
+                  STELLANTIS
+                </span>
+                <span className="text-[10px] font-bold truncate sis-text-muted">
+                  SIS Totem Betim
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1">
+            {/* Botão de Fechar no Mobile */}
+            <button
+              onClick={onCloseMobile}
+              className="md:hidden p-2 rounded-lg transition cursor-pointer flex items-center justify-center hover:opacity-80 min-w-[40px] min-h-[40px]"
+              style={{ color: 'var(--sis-text-muted)' }}
+              title="Fechar menu lateral"
+              aria-label="Fechar menu"
+            >
+              <i className="fa-solid fa-xmark text-base"></i>
+            </button>
+
+            {/* Botão Recolher/Expandir no Desktop */}
+            <button
+              onClick={onToggleCollapsed}
+              className="hidden md:flex p-1.5 rounded-lg transition cursor-pointer items-center justify-center hover:opacity-80"
+              style={{ color: 'var(--sis-text-muted)' }}
+              title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+              aria-label={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+            >
+              <i className={`fa-solid ${collapsed ? 'fa-angles-right' : 'fa-angles-left'} text-sm`}></i>
+            </button>
+          </div>
+        </div>
 
       {/* Seletor de Perfil */}
       {!collapsed && (
@@ -233,7 +281,7 @@ export function SidebarNavigation({
                     return (
                       <button
                         key={item.id}
-                        onClick={() => onSelectTab(item.id)}
+                        onClick={() => handleSelectTab(item.id)}
                         className={`w-full flex items-center justify-between py-1.5 px-2 rounded-lg text-xs font-semibold transition cursor-pointer text-left ${
                           isActive ? 'shadow font-bold' : 'hover:opacity-80'
                         }`}
@@ -326,5 +374,6 @@ export function SidebarNavigation({
         )}
       </div>
     </aside>
+    </>
   );
 }

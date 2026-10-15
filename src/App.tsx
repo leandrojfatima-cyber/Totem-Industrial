@@ -21,6 +21,7 @@ import { GestaoHierarquiaMasterView } from './components/GestaoHierarquiaMasterV
 import { QualidadeView } from './components/QualidadeView';
 import { SegurancaView } from './components/SegurancaView';
 import { SisWoView } from './components/SisWoView';
+import { GuiaInfograficoView } from './components/GuiaInfograficoView';
 import { 
   UserRole,
   UteRecord,
@@ -559,6 +560,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<string>("MAPA_LINHA");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [modalTargetId, setModalTargetId] = useState<number | null>(null);
 
@@ -1231,47 +1233,60 @@ export default function App() {
         currentRole={currentRole}
         onChangeRole={setCurrentRole}
         onSetTheme={setTheme}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
       {/* Área Principal de Conteúdo */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden sis-bg-app">
         <header
-          className="border-b px-4 py-2.5 flex flex-wrap justify-between items-center no-print shrink-0 gap-2 sis-bg-surface sis-shadow-sm"
+          className="border-b px-2 sm:px-3 py-1.5 flex items-center justify-between no-print shrink-0 gap-1.5 sm:gap-2 sis-bg-surface sis-shadow-sm min-h-[42px] overflow-x-auto text-xs"
           style={{ borderColor: 'var(--sis-border-main)' }}
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            {/* Botão Hambúrguer Mobile */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-1.5 rounded-md border flex items-center justify-center cursor-pointer sis-btn-secondary shrink-0 min-w-[34px] min-h-[34px]"
+              title="Abrir menu de navegação"
+              aria-label="Abrir menu de navegação"
+            >
+              <i className="fa-solid fa-bars text-sm"></i>
+            </button>
+
             <span
-              className="text-xs font-mono font-bold px-2.5 py-1 rounded border"
+              className="text-[11px] font-mono font-bold px-2 py-0.5 rounded border shrink-0"
               style={{ backgroundColor: 'var(--sis-status-warn-bg)', color: 'var(--sis-status-warn-text)', borderColor: 'var(--sis-status-warn-border)' }}
             >
               {data.header.plant}
             </span>
-            <span className="text-xs font-mono hidden md:inline font-semibold sis-text-secondary">
+            <span className="text-[11px] font-mono hidden md:inline font-semibold sis-text-secondary shrink-0">
               {data.header.line} • {data.header.area}
             </span>
 
-            {/* Busca Global */}
+            {/* Busca Global Compacta */}
             <form onSubmit={handleHeaderSearchSubmit} className="relative flex items-center">
               <input
                 type="text"
-                placeholder="Busca global (PDT, Linha, Líder)..."
+                placeholder="Busca..."
                 value={headerGlobalSearch}
                 onChange={e => setHeaderGlobalSearch(e.target.value)}
-                className="text-xs font-mono pl-7 pr-3 py-1 rounded-lg border w-44 sm:w-56 focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
+                className="text-xs font-mono pl-6 pr-2 py-0.5 rounded-lg border w-24 sm:w-36 md:w-44 focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
                 style={{ outlineColor: 'var(--sis-focus-ring)' }}
               />
-              <i className="fa-solid fa-magnifying-glass text-[11px] absolute left-2.5 pointer-events-none" style={{ color: 'var(--sis-text-muted)' }}></i>
+              <i className="fa-solid fa-magnifying-glass text-[10px] absolute left-2 pointer-events-none" style={{ color: 'var(--sis-text-muted)' }}></i>
             </form>
           </div>
 
-          <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
             {/* Perfil */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-mono hidden lg:inline font-bold sis-text-muted">Perfil:</span>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] font-mono hidden xl:inline font-bold sis-text-muted">Perfil:</span>
               <select
                 value={currentRole}
                 onChange={e => setCurrentRole(e.target.value as UserRole)}
-                className="text-xs font-mono font-bold px-2 py-1 rounded-lg border cursor-pointer focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
+                className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-md border cursor-pointer focus:outline-none transition sis-input-bg sis-input-border sis-input-text"
                 title="Troca rápida de perfil de usuário"
               >
                 {rolesList.map(r => (
@@ -1281,32 +1296,31 @@ export default function App() {
             </div>
 
             {/* Backup JSON */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <button
                 type="button"
                 onClick={handleExportBackupCompleto}
-                className="p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary sis-shadow-sm"
-                title="Exportar backup completo em JSON"
+                className="p-1 px-1.5 rounded-md text-[10px] font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary"
+                title="Exportar backup JSON"
               >
-                <i className="fa-solid fa-download text-xs"></i>
-                <span className="hidden xl:inline text-[10px]">Backup JSON</span>
+                <i className="fa-solid fa-download text-[10px]"></i>
+                <span className="hidden 2xl:inline">Backup</span>
               </button>
               <label
-                className="p-1.5 px-2 rounded-lg text-xs font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary sis-shadow-sm"
-                title="Restaurar backup completo"
+                className="p-1 px-1.5 rounded-md text-[10px] font-bold border transition flex items-center gap-1 cursor-pointer sis-btn-secondary"
+                title="Restaurar backup"
               >
-                <i className="fa-solid fa-upload text-xs"></i>
-                <span className="hidden xl:inline text-[10px]">Importar</span>
+                <i className="fa-solid fa-upload text-[10px]"></i>
                 <input type="file" accept=".json" onChange={handleImportBackupCompleto} className="hidden" />
               </label>
             </div>
 
             {/* Score de Auditoria */}
             <div
-              className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs sis-bg-surface-subtle"
+              className="hidden lg:flex items-center space-x-1 px-1.5 py-0.5 rounded-md border font-mono text-[11px] sis-bg-surface-subtle"
               style={{ borderColor: 'var(--sis-border-main)' }}
             >
-              <span className="sis-text-muted">Score:</span>
+              <span className="sis-text-muted text-[10px]">Score:</span>
               <span className="font-black" style={{ color: auditScore >= 80 ? 'var(--sis-green-text)' : 'var(--sis-yellow-text)' }}>
                 {auditScore}%
               </span>
@@ -1314,7 +1328,7 @@ export default function App() {
 
             {/* Alternador de Tema */}
             <div
-              className="flex items-center p-0.5 rounded-lg border shadow-xs transition-colors sis-bg-surface-subtle"
+              className="flex items-center p-0.5 rounded-md border shadow-xs transition-colors sis-bg-surface-subtle"
               style={{ borderColor: 'var(--sis-border-main)' }}
               role="group"
               aria-label="Alternador de Tema Visual"
@@ -1322,49 +1336,71 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setTheme('light')}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer"
+                className="p-1 rounded text-xs font-bold transition-all cursor-pointer"
                 style={theme === 'light'
-                  ? { backgroundColor: '#FBBF24', color: '#0F172A', boxShadow: '0 1px 2px rgba(0,0,0,0.15)' }
+                  ? { backgroundColor: '#FBBF24', color: '#0F172A' }
                   : { color: 'var(--sis-text-muted)' }
                 }
-                title="Ativar Tema Claro (Uso Diurno)"
+                title="Tema Claro"
                 aria-pressed={theme === 'light'}
               >
-                <i className="fa-solid fa-sun text-xs"></i>
-                <span className="hidden sm:inline text-[11px] font-mono">Claro</span>
+                <i className="fa-solid fa-sun text-[10px]"></i>
               </button>
               <button
                 type="button"
                 onClick={() => setTheme('dark')}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold transition-all cursor-pointer"
+                className="p-1 rounded text-xs font-bold transition-all cursor-pointer"
                 style={theme === 'dark'
-                  ? { backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF', boxShadow: '0 1px 2px rgba(0,0,0,0.3)' }
+                  ? { backgroundColor: 'var(--sis-blue-primary)', color: '#FFFFFF' }
                   : { color: 'var(--sis-text-muted)' }
                 }
-                title="Ativar Tema Escuro (Uso Noturno)"
+                title="Tema Escuro"
                 aria-pressed={theme === 'dark'}
               >
-                <i className="fa-solid fa-moon text-xs"></i>
-                <span className="hidden sm:inline text-[11px] font-mono">Escuro</span>
+                <i className="fa-solid fa-moon text-[10px]"></i>
               </button>
             </div>
 
-            <div className="text-right font-mono text-xs hidden lg:block">
-              <div className="font-bold sis-text-primary">{data.header.teamLeader}</div>
-              <div className="text-[10px] sis-text-muted">{data.header.shift} • {data.header.date}</div>
+            <div className="text-right font-mono text-[11px] hidden xl:block leading-tight">
+              <div className="font-bold sis-text-primary truncate max-w-[120px]">{data.header.teamLeader}</div>
+              <div className="text-[9px] sis-text-muted">{data.header.shift}</div>
             </div>
 
             <button
-              onClick={() => openFormModal('efetivo')}
-              className="px-2.5 py-1.5 rounded-lg text-xs font-bold border flex items-center gap-1.5 cursor-pointer transition sis-btn-primary sis-shadow-sm"
+              type="button"
+              onClick={() => setActiveTab('GUIA_INFOGRAFICO')}
+              className={`px-2.5 py-1 rounded-md text-xs font-bold border flex items-center gap-1.5 cursor-pointer transition shrink-0 ${
+                activeTab === 'GUIA_INFOGRAFICO'
+                  ? 'sis-btn-primary'
+                  : 'sis-btn-secondary hover:opacity-90'
+              }`}
+              title="Guia Oficial de Recursos do Sistema em Modo Infográfico"
             >
-              <i className="fa-solid fa-user-plus"></i>
+              <i className="fa-solid fa-chalkboard-user text-[11px] text-sky-400"></i>
+              <span className="hidden md:inline">Guia & Infográficos</span>
+            </button>
+
+            <button
+              onClick={() => openFormModal('efetivo')}
+              className="px-2 py-1 rounded-md text-xs font-bold border flex items-center gap-1 cursor-pointer transition sis-btn-primary shrink-0"
+              title="Cadastrar / Alocar Operador"
+            >
+              <i className="fa-solid fa-user-plus text-[10px]"></i>
               <span className="hidden sm:inline">Operador</span>
             </button>
           </div>
         </header>
 
-        <div className="flex-1 p-4 overflow-y-auto">
+        <div className={`flex-1 overflow-y-auto ${activeTab === 'MAPA_LINHA' || activeTab === 'MAPA_EDICAO' ? 'p-1 flex flex-col min-h-0' : 'p-4'}`}>
+          {/* 0. Guia Geral & Infográficos */}
+          {activeTab === 'GUIA_INFOGRAFICO' && (
+            <GuiaInfograficoView
+              currentRole={currentRole}
+              onNavigateToTab={setActiveTab}
+              theme={theme}
+            />
+          )}
+
           {/* 1. Módulos de Operação */}
           {activeTab === 'MAPA_LINHA' && (
             <MapaLinhaSvgView
@@ -1539,6 +1575,86 @@ export default function App() {
           {activeTab === 'LOGS' && <LogsView />}
           {activeTab === 'RELATORIOS' && <RelatoriosView data={data} />}
         </div>
+
+        {/* Barra de Navegação Rápida Mobile — Padrão Internacional Industrial */}
+        <nav
+          className="md:hidden border-t px-2 py-1 pb-safe flex items-center justify-around shrink-0 z-30 sis-bg-surface-elevated sis-shadow-lg min-h-[52px]"
+          style={{ borderColor: 'var(--sis-border-main)' }}
+          aria-label="Navegação rápida mobile"
+        >
+          <button
+            type="button"
+            onClick={() => setActiveTab('MAPA_LINHA')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition min-w-[56px] min-h-[44px] cursor-pointer ${
+              activeTab === 'MAPA_LINHA' || activeTab === 'MAPA_EDICAO'
+                ? 'font-bold'
+                : 'sis-text-muted hover:sis-text-primary'
+            }`}
+            style={activeTab === 'MAPA_LINHA' || activeTab === 'MAPA_EDICAO' ? { color: 'var(--sis-blue-text)' } : {}}
+          >
+            <i className="fa-solid fa-map-location-dot text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Mapa</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('A1_BRIEFING')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition min-w-[56px] min-h-[44px] cursor-pointer ${
+              activeTab === 'A1_BRIEFING' ? 'font-bold' : 'sis-text-muted hover:sis-text-primary'
+            }`}
+            style={activeTab === 'A1_BRIEFING' ? { color: 'var(--sis-blue-text)' } : {}}
+          >
+            <i className="fa-solid fa-map text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Folha A1</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('GEMBA')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg transition min-w-[56px] min-h-[44px] cursor-pointer ${
+              activeTab === 'GEMBA' ? 'font-bold' : 'sis-text-muted hover:sis-text-primary'
+            }`}
+            style={activeTab === 'GEMBA' ? { color: 'var(--sis-blue-text)' } : {}}
+          >
+            <i className="fa-solid fa-shoe-prints text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Gemba</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('SEGURANCA')}
+            className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-lg transition min-w-[50px] min-h-[44px] cursor-pointer ${
+              activeTab === 'SEGURANCA' ? 'font-bold' : 'sis-text-muted hover:sis-text-primary'
+            }`}
+            style={activeTab === 'SEGURANCA' ? { color: 'var(--sis-blue-text)' } : {}}
+          >
+            <i className="fa-solid fa-shield-halved text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Segurança</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('GUIA_INFOGRAFICO')}
+            className={`flex flex-col items-center justify-center py-1 px-1.5 rounded-lg transition min-w-[50px] min-h-[44px] cursor-pointer ${
+              activeTab === 'GUIA_INFOGRAFICO' ? 'font-bold' : 'sis-text-muted hover:sis-text-primary'
+            }`}
+            style={activeTab === 'GUIA_INFOGRAFICO' ? { color: 'var(--sis-blue-text)' } : {}}
+          >
+            <i className="fa-solid fa-chalkboard-user text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Guia</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center py-1 px-1.5 rounded-lg transition min-w-[50px] min-h-[44px] cursor-pointer sis-text-muted hover:sis-text-primary"
+            title="Abrir menu com todos os módulos"
+            aria-label="Abrir menu com todos os módulos"
+          >
+            <i className="fa-solid fa-bars text-base mb-0.5"></i>
+            <span className="text-[10px] tracking-tight">Mais</span>
+          </button>
+        </nav>
       </main>
 
       {/* Modal Genérico Reutilizável Original */}
